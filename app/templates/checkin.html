@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="{{ url_for('static', path='js/checkin.js') }}"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 flex items-center justify-center font-sans">
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-lg w-full">
+        <h1 class="text-xl font-bold text-slate-800 mb-1">Boletim de Alojamento (SIBA)</h1>
+        <p class="text-xs text-slate-500 mb-6">Reserva: <span class="font-mono font-semibold text-blue-600">{{ reserva_id }}</span></p>
+        
+        <div class="flex items-center justify-between mb-4 border-b pb-3">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Boletim SIBA</h1>
+                <p class="text-xs text-slate-500">Reserva: <span class="font-mono font-semibold text-blue-600">{{ reserva_id }}</span></p>
+            </div>
+            <button id="btn-add-hospede" type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg border border-slate-300">
+                + Adicionar Hóspede
+            </button>
+            <button id="btn-remove-hospede" type="button" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-3 py-1.5 rounded-lg border border-red-300">
+                - Remover Hóspede
+            </button>
+        </div>
+        <div id="tabs-container" class="flex gap-2 mb-4 overflow-x-auto pb-1"></div>
+        <form id="form-checkin" class="space-y-4">
+        <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome Completo</label>
+            <input type="text" id="campo-nome" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nº do Documento (Passaporte / CC)</label>
+            <input type="text" id="campo-doc" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <!-- Navegação Anterior / Seguinte -->
+        <div class="flex gap-3 pt-2">
+            <button id="btn-anterior" type="button" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2 rounded-lg">
+                &larr; Anterior
+            </button>
+            <button id="btn-seguinte" type="button" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2 rounded-lg">
+                Seguinte &rarr;
+            </button>
+        </div>
+
+            <button id="checkin" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
+                Submeter Check-in
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
