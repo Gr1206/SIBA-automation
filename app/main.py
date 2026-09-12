@@ -4,10 +4,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routes import checkin, dashboard
+from app.routes import checkin, dashboard, reservations
 from app.core.templates import templates
+from app.db.session import engine, Base
 
-
+Base.metadata.create_all(bind=engine) 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
 BASE_DIR = Path(__file__).resolve().parent #base do proj
 
@@ -16,6 +17,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 app.include_router(checkin.router)
 app.include_router(dashboard.router)
+app.include_router(reservations.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):

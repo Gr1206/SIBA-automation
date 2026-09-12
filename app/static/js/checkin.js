@@ -16,12 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnFinalizar = document.getElementById("checkin");
 
     //Save array & localStorage
-    function salvarAtual() {
+    async function salvarAtual() {
         if (hospedes[indiceAtual]) {
             hospedes[indiceAtual].nome = inputNome.value;
             hospedes[indiceAtual].documento = inputDoc.value;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(hospedes));
         }
+        
     }
 
     // Render form & guest
@@ -66,15 +67,15 @@ document.addEventListener("DOMContentLoaded", () => {
     //clicks
     inputNome.addEventListener("input", salvarAtual);
     inputDoc.addEventListener("input", salvarAtual);
-    btnRemove.addEventListener("click", () => {
+    btnRemove.addEventListener("click", async () => {
         if (hospedes.length > 1) {
-            salvarAtual();
             hospedes.splice(indiceAtual, 1);
             if (indiceAtual >= hospedes.length) {
                 indiceAtual = hospedes.length - 1;
             }
             removeGuest(hospedes);
             renderizar();
+            await salvarAtual();
         }
     });
     btnAdd.addEventListener("click", () => {
@@ -100,9 +101,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    btnFinalizar.addEventListener("click", () => {
-        salvarAtual();
+    btnFinalizar.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        //integrar com db       
+        const pathParts = window.location.pathname.split("/").filter(Boolean);
+        const reservationId = pathParts[pathParts.length - 1];//number reservation
+        const url = "/api/reservations/" + reservationId;
+        try {
+            const res = await fetch(url, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    guestName: hospedes[0].nome || "Desconhecido",
+                    guestCount: hospedes.length,
+                })
+            });
+            const resData = await res.json();
+            console.log("RESPOSTA: ", resData);
+        } catch (error) {
+            console.error("Error adding updating reservation:", error);
+        }
         console.log("Payload pronto para o backend:", hospedes);
+        await salvarAtual();
         alert(`Sucesso! ${hospedes.length} hóspede(s) gravado(s) no localStorage.`);
     });
 

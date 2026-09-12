@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Gestão - SIBA Automation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="{{ url_for('static', path='js/dashboard.js') }}"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen">
+
+    <!-- Barra de Navegação -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <span class="bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded">SIBA</span>
+            <span class="text-sm font-semibold text-slate-700">Controlo de Boletins de Alojamento</span>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Ambiente: DEV
+            </span>
+        </div>
+    </header>
+    
+    <main class="max-w-7xl mx-auto p-6 space-y-6">
+        
+        <!-- Métricas Rápidas -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <p class="text-xs uppercase font-medium text-slate-500">Reservas</p>
+                <p id="totalReserv" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <p class="text-xs uppercase font-medium text-slate-500">Pendentes de Envio</p>
+                <p id="totalPend" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <p class="text-xs uppercase font-medium text-slate-500">Enviados ao SIBA</p>
+                <p id="totalEnv" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <p class="text-xs uppercase font-medium text-slate-500">Com Erro de Validação</p>
+                <p id="totalErr" class="text-2xl font-bold text-rose-600 mt-1">0</p>
+            </div>
+        </section>
+        
+        <button id="newReservation" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors ">
+            + New reservation
+        </button>
+
+        <!-- Tabela de Reservas e Boletins -->
+        <section class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-800">Boletins de Alojamento Recentes</h2>
+                    <p class="text-xs text-slate-500">Acompanhe as submissões e o estado de cada hóspede.</p>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" placeholder="Filtrar por reserva ou nome..." class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4">Reserva</th>
+                            <th class="py-3 px-4">Hóspede Principal</th>
+                            <th class="py-3 px-4">Nº Hóspedes</th>
+                            <th class="py-3 px-4">Check-in</th>
+                            <th class="py-3 px-4">Check-out</th>
+                            <th class="py-3 px-4">Estado SIBA</th>
+                            <th class="py-3 px-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationsTable" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>
