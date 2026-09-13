@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function deleteReservationDB(reservationId) {
         //handle db delete for reservation
     }
-            
+        
     btn.addEventListener("click", async () => {
         //add new table row with pending state
         try {
@@ -102,5 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     });
+    
     fetchReservations();
+    
+  
+    
 });

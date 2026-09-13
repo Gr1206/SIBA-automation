@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routes import checkin, dashboard, reservations
+from app.routes import checkin, dashboard, reservations, profile
 from app.core.templates import templates
 from app.db.session import engine, Base
 
@@ -18,6 +18,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 app.include_router(checkin.router)
 app.include_router(dashboard.router)
 app.include_router(reservations.router)
+app.include_router(profile.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
