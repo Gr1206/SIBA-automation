@@ -38,6 +38,20 @@ def update_reservation(reservation_id: int, payload: ReservationUpdate, db: Sess
     
     return reservation
 
+@router.delete(
+    "/{reservation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Deletar uma reserva existente"
+)
+def delete_reservation(reservation_id: int, db: Session = Depends(get_db)):
+    reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
+
+    db.delete(reservation)
+    db.commit()
+    return None
+
 @router.post(
     "/",
     response_model=ReservationResponse,

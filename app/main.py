@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routes import checkin, dashboard, reservations, profile
+from app.routes import checkin, dashboard, reservations, profile, login, register
 from app.core.templates import templates
 from app.db.session import engine, Base
 
@@ -19,12 +19,14 @@ app.include_router(checkin.router)
 app.include_router(dashboard.router)
 app.include_router(reservations.router)
 app.include_router(profile.router)
+app.include_router(login.router)
+app.include_router(register.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse(
         request=request,
-        name="index.html", 
+        name="landing.html", 
         context={"titulo": "Bem-vindo ao SIBA"}
     )
 
