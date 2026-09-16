@@ -4,7 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field, Field
 
 #frontend no POST
 class ReservationCreate(BaseModel):
-    code: int
+    #code: int
+    #id: int
     guest_name: str = Field(default="Pendente", alias="guestName")
     guest_count: int = Field(default=1, alias="guestCount")
     check_in: Optional[date] = Field(default=None, alias="checkIn")
@@ -16,11 +17,11 @@ class ReservationCreate(BaseModel):
 #frontend no GET
 class ReservationResponse(BaseModel):
     id: int
-    code: int = "Pending"
+    #code: int = "Pending"
     guest_name: str = "Pending"
     guest_count: int = 1
-    check_in: Optional[date] = "Pending"
-    check_out: Optional[date] = "Pending"
+    check_in: Optional[date] = None
+    check_out: Optional[date] = None
     status: str
 
     model_config = ConfigDict(from_attributes=True)

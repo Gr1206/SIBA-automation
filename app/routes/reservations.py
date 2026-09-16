@@ -1,7 +1,7 @@
 import random
 import string
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -15,9 +15,15 @@ router = APIRouter(prefix="/api/reservations", tags=["Reservations"])
     response_model=List[ReservationResponse],
     summary="Listar todas as reservas"
 )
-def get_reservations(db: Session = Depends(get_db)):
-    return db.query(Reservation).order_by(Reservation.id.desc()).all()
+def get_reservations(
+    user_id: str | None = Cookie(default=None),
+    db: Session = Depends(get_db)):
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Não autenticado")
 
+    return (
+        db.query(Reservation).filter(Reservation.user_id == int(user_id)).all()
+    )
 
 @router.patch(
     "/{reservation_id}",
@@ -58,14 +64,25 @@ def delete_reservation(reservation_id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
     summary="Criar uma nova reserva pendente"
 )
-def create_reservation(payload: ReservationCreate, db: Session = Depends(get_db)):
+def create_reservation(
+    payload: ReservationCreate, 
+    user_id: str | None = Cookie(default=None), 
+    db: Session = Depends(get_db)):
+
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Não autenticado. Inicie sessão novamente.",
+        )
+
     new = Reservation(
-        code=payload.code,
+        #code=payload.code,
         guest_name=payload.guest_name,
         guest_count=payload.guest_count,
         check_in=payload.check_in,
         check_out=payload.check_out,
-        status=payload.status
+        status=payload.status,
+        user_id=int(user_id) 
     )
 
     db.add(new)

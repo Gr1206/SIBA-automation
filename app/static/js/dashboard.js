@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("--> O dashboard.js carregou com sucesso!");
     const btn = document.getElementById("newReservation");
     const t = document.getElementById("reservationsTable");
     const totalReserv = document.getElementById("totalReserv");
@@ -31,10 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         t.innerHTML = "";
         reservations.forEach((reservation, index) => {
+            console.log("DADOS QUE CHEGARAM:", reservations);
             const row = document.createElement("tr");
             row.className = "hover:bg-slate-50 transition-colors";
             row.innerHTML = `
-                <td class="py-3 px-4 text-center font-mono font-medium text-blue-600">${reservation.code}</td>
+                <td class="py-3 px-4 text-center font-mono font-medium text-blue-600">${reservation.id}</td>
                 <td class="py-3 px-4 text-center font-medium text-slate-800">${reservation.guest_name}</td>
                 <td class="py-3 px-4 text-center">${reservation.guest_count}</td>
                 <td class="py-3 px-4 text-center">${reservation.check_in}</td>
@@ -136,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    code: reservations.length + 1,
+                    //code: reservations.length + 1,
                     guest_name: "Pending " + (reservations.length + 1),
                     guest_count: 1,
                     check_in: null,
@@ -146,6 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             
             const novaReserva = await res.json();
+            console.log("RESPOSTA DO POST:", novaReserva);
+            console.log("ID DA RESERVA:", novaReserva.id);
             reservations.push(novaReserva);
             renderReservations();
         } catch (error) {

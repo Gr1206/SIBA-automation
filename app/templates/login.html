@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Entrar | SIBA Automation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"
+            src="/static/js/login.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
 
@@ -29,7 +30,7 @@
             <!-- Mensagem de feedback/erro genérica (placeholder) -->
             <div id="loginFeedback" class="hidden mb-4 p-3 rounded text-sm bg-red-50 text-red-700 border border-red-200"></div>
 
-            <form id="loginForm" method="POST" action="/api/auth/login" class="space-y-5">
+            <form id="loginForm" class="space-y-5">
                 
                 <!-- Email -->
                 <div>
