@@ -1,28 +1,45 @@
 document.addEventListener("DOMContentLoaded", () => {
     const updatesBtn = document.getElementById("saveProfileBtn");
 
+    async function fetchProfileData() {
+        try {
+            const response = await fetch("/profile");
+            if (!response.ok) {
+                throw new Error("Failed to fetch profile data");
+            }
+            const profileData = await response.json();
+            document.getElementById("fullName").value = profileData.full_name || "";
+            document.getElementById("email").value = profileData.email || "";
+        } catch (error) {
+            console.error("Error fetching profile data:", error);
+        }
+    }
+
     updatesBtn?.addEventListener("click", async (event) => {
         event.preventDefault();
-        const name = document.getElementById("fullName").value;
-        const email = document.getElementById("email").value;
-
         try {
-            const responde = await fetch("/profile", {
+            const fullName = document.getElementById("fullName").value;
+            const email = document.getElementById("email").value;
+
+            const response = await fetch("/profile", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ full_name: name, email: email })
+                body: JSON.stringify({ full_name: fullName, email: email })
             });
 
-            if (!responde.ok) {
-                throw new Error("Failed to update profile");
+            if (!response.ok) {
+                throw new Error("Failed to update profile data");
             }
 
-            const updatedProfile = await responde.json();
-            console.log("Profile updated:", updatedProfile);
-        } catch (error) {
-            console.error("Error updating profile:", error);
+            alert("Profile updated successfully!");
+        }
+        catch (error) {
+            console.error("Error updating profile data:", error);
+            alert("Failed to update profile. Please try again.");
         }
     });
+
+    fetchProfileData();
 });
