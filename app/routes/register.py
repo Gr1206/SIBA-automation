@@ -4,7 +4,7 @@ from app.core.templates import templates
 from app.models.login import User
 from app.db.session import get_db
 from app.schemas.login import RegisterRequest
-from app.utils.sec import get_password_hash
+from app.utils.sec import get_password_hash, gen_sesh_cookie
 router = APIRouter(prefix="/register", tags=["Register"])
 
 @router.get("/", response_class=HTMLResponse)
@@ -38,10 +38,15 @@ def register_user(credentials: RegisterRequest, response: Response, request: Req
     db.commit()
     db.refresh(new_user)
 
+    #build cookie
+
+    cookie_value = gen_sesh_cookie(new_user.id)
+
     response.set_cookie(
         key="user_id",
-        value=str(new_user.id),
+        value=cookie_value,
         httponly=True,
+        max_age= 3600 * 24,
         samesite="lax",
         path="/",
     )

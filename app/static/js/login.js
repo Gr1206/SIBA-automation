@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
             console.log("Login successful:", data);
-            window.location.replace("/dashboard"); 
+            window.location.replace("/dashboard/"); 
         } catch (error) {
             console.error("Error during login:", error);
             alert("Login failed. Please check your credentials.");

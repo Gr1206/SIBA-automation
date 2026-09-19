@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.reservations import Reservation
 from app.schemas.reservations import ReservationCreate, ReservationResponse, ReservationUpdate
+from app.utils.sec import current_user
 
 router = APIRouter(prefix="/api/reservations", tags=["Reservations"])
 
@@ -16,11 +17,9 @@ router = APIRouter(prefix="/api/reservations", tags=["Reservations"])
     summary="Listar todas as reservas"
 )
 def get_reservations(
-    user_id: str | None = Cookie(default=None),
+    user_id: int = Depends(current_user),
     db: Session = Depends(get_db)):
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Não autenticado")
-
+    
     return (
         db.query(Reservation).filter(Reservation.user_id == int(user_id)).all()
     )
@@ -30,7 +29,9 @@ def get_reservations(
     response_model=ReservationResponse,
     summary="Atualizar uma reserva existente"
 )
-def update_reservation(reservation_id: int, payload: ReservationUpdate, db: Session = Depends(get_db)):
+def update_reservation(reservation_id: int, 
+                       payload: ReservationUpdate, 
+                       db: Session = Depends(get_db)):
     reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
@@ -49,8 +50,10 @@ def update_reservation(reservation_id: int, payload: ReservationUpdate, db: Sess
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Deletar uma reserva existente"
 )
-def delete_reservation(reservation_id: int, db: Session = Depends(get_db)):
-    reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+def delete_reservation(reservation_id: int, 
+                       user_id: int = Depends(current_user),
+                       db: Session = Depends(get_db)):
+    reservation = db.query(Reservation).filter(Reservation.id == reservation_id , Reservation.user_id == user_id).first()
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
@@ -66,14 +69,8 @@ def delete_reservation(reservation_id: int, db: Session = Depends(get_db)):
 )
 def create_reservation(
     payload: ReservationCreate, 
-    user_id: str | None = Cookie(default=None), 
+    user_id: int = Depends(current_user),
     db: Session = Depends(get_db)):
-
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Não autenticado. Inicie sessão novamente.",
-        )
 
     new = Reservation(
         #code=payload.code,

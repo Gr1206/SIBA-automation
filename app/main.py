@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.routes import checkin, dashboard, reservations, profile, login, register
 from app.core.templates import templates
 from app.db.session import engine, Base
+from app.exceptions.expiredSession import SessionExpiredException
 
 Base.metadata.create_all(bind=engine) 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
@@ -28,6 +29,15 @@ async def root(request: Request):
         request=request,
         name="landing.html", 
         context={"titulo": "Bem-vindo ao SIBA"}
+    )
+
+@app.exception_handler(SessionExpiredException)
+async def session_expired_exception_handler(request: Request, exc: SessionExpiredException):
+    return templates.TemplateResponse(
+        request=request,
+        name="session_expired.html",
+        context={"titulo": "Sessão Expirada", "message": "A sua sessão expirou. Por favor, faça login novamente."},
+        status_code=401
     )
 
 

@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("--> O dashboard.js carregou com sucesso!");
+    fetchReservations();
     const btn = document.getElementById("newReservation");
     const t = document.getElementById("reservationsTable");
     const totalReserv = document.getElementById("totalReserv");
@@ -68,6 +68,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const response = await fetch("/api/reservations/");
             reservations = await response.json();
+
+            if (response.status === 401) {
+                const htmlMidPage = await response.text();
+                document.open();
+                document.write(htmlMidPage);
+                document.close();
+                return;
+            }
+
             renderReservations();
         } catch (error) {
             console.error("Error fetching reservations:", error);
@@ -111,6 +120,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(`/api/reservations/${reservationId}`, {
                 method: "DELETE"
             });
+            if (res.status === 401) {
+                const htmlMidPage = await res.text();
+
+                document.open();
+                document.write(htmlMidPage);
+                document.close();
+                
+                return;
+            }
             if (!res.ok) {
                 throw new Error("Error deleting reservation");
             }
@@ -146,6 +164,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     status: "Pending"
                 })
             });
+
+            if (res.status === 401) {
+                const htmlMidPage = await res.text();
+                document.open();
+                document.write(htmlMidPage);
+                document.close();
+                return;
+            }
             
             const novaReserva = await res.json();
             console.log("RESPOSTA DO POST:", novaReserva);
@@ -156,12 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error adding new reservation:", error);
         }
 
-    });
-
-
-    
-    fetchReservations();
-    
+    });    
   
     
 });

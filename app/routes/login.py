@@ -4,8 +4,9 @@ from app.core.templates import templates
 from app.models.login import User
 from app.db.session import get_db
 from app.schemas.login import LoginRequest
-from app.utils.sec import verify_password
+from app.utils.sec import verify_password, gen_sesh_cookie
 router = APIRouter(prefix="/login", tags=["Login"])
+
 
 @router.get("/", response_class=HTMLResponse)
 async def login(request: Request):
@@ -28,10 +29,13 @@ def login_user(credentials: LoginRequest, response: Response, db = Depends(get_d
 
     ##build cookie
 
+    cookie_value = gen_sesh_cookie(user.id)
+
     response.set_cookie(
         key="user_id", 
-        value=str(user.id), 
+        value=cookie_value, 
         httponly=True,
+        max_age= 3600 * 24, 
         samesite="lax",
         path="/",
     )

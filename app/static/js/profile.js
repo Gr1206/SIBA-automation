@@ -4,6 +4,15 @@ document.addEventListener("DOMContentLoaded", () => {
     async function fetchProfileData() {
         try {
             const response = await fetch("/profile");
+            
+            if (response.status === 401) {
+                const htmlMidPage = await response.text();
+                document.open();
+                document.write(htmlMidPage);
+                document.close();
+                return;
+            }
+            
             if (!response.ok) {
                 throw new Error("Failed to fetch profile data");
             }
@@ -28,6 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify({ full_name: fullName, email: email })
             });
+
+            if(response.status === 401) {
+                const htmlMidPage = await response.text();
+                document.open();
+                document.write(htmlMidPage);
+                document.close();
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error("Failed to update profile data");
