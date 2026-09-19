@@ -15,9 +15,10 @@ class Settings(BaseSettings):
 
     # Segurança
     SECRET_KEY: str
+    SIBA_ENCRYPT_KEY: str
 
     # Leitura automática do ficheiro .env na raiz do projeto
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property
     def siba_wsdl(self) -> str:

@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+    fetchProfileData();
     const updatesBtn = document.getElementById("saveProfileBtn");
 
     async function fetchProfileData() {
         try {
-            const response = await fetch("/profile");
+            const response = await fetch("/profile/data");
             
             if (response.status === 401) {
                 const htmlMidPage = await response.text();
@@ -19,6 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const profileData = await response.json();
             document.getElementById("fullName").value = profileData.full_name || "";
             document.getElementById("email").value = profileData.email || "";
+            document.getElementById("sibaCode").value = profileData.siba_code || "";
+            //document.getElementById("sibaKey").value = profileData.siba_key || "";
+            document.getElementById("sibaNif").value = profileData.nif || "";
         } catch (error) {
             console.error("Error fetching profile data:", error);
         }
@@ -29,13 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const fullName = document.getElementById("fullName").value;
             const email = document.getElementById("email").value;
-
+            const sibaCode = document.getElementById("sibaCode").value;
+            const sibaKey = document.getElementById("sibaKey").value;
+            const nif = document.getElementById("sibaNif").value;
             const response = await fetch("/profile", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ full_name: fullName, email: email })
+                body: JSON.stringify({ full_name: fullName, email: email, siba_code: sibaCode, siba_key: sibaKey, nif: nif })
             });
 
             if(response.status === 401) {
@@ -58,5 +64,4 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    fetchProfileData();
 });

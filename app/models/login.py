@@ -13,6 +13,9 @@ class User(Base):
     full_name = Column(String)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    nif = Column(String, unique=True, index=True, nullable=True)
+    hashed_sibaKey = Column(String, index=True, nullable=True)
+    siba_code = Column(String, unique=True, index=True, nullable=True)
     is_active = Column(Boolean, default=1)  # 1 for active, 0 for inactive
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

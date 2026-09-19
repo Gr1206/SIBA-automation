@@ -1,0 +1,60 @@
+<dialog id="datePickerDialog" class="modal-calendar-dialog">
+    <div class="dialog-content">
+        <button type="button" class="dialog-close-btn" id="closeDatePickerBtn" aria-label="Fechar">&times;</button>
+
+        <div class="date-picker-card">
+            <div class="picker-header">
+                <button type="button" class="nav-btn prev-month" id="prevMonthBtn" aria-label="Mês anterior">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+
+                <div class="month-titles">
+                    <h3 class="month-title" id="monthTitleA">Mês</h3>
+                    <h3 class="month-title" id="monthTitleB">Mês</h3>
+                </div>
+
+                <button type="button" class="nav-btn next-month" id="nextMonthBtn" aria-label="Próximo mês">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="calendars-wrapper">
+                <div class="calendar-month">
+                    <div class="weekdays-grid">
+                        <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                    </div>
+                    <div class="days-grid" id="monthCalendarOne"></div>
+                </div>
+
+                <div class="calendar-month">
+                    <div class="weekdays-grid">
+                        <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                    </div>
+                    <div class="days-grid" id="monthCalendarTwo"></div>
+                </div>
+            </div>
+
+            <div class="picker-footer">
+                <div class="selected-summary">
+                    <div class="summary-box">
+                        <small>Check-in</small>
+                        <strong id="summaryCheckIn">-- / -- / ----</strong>
+                    </div>
+                    <span class="divider">→</span>
+                    <div class="summary-box">
+                        <small>Check-out</small>
+                        <strong id="summaryCheckOut">-- / -- / ----</strong>
+                    </div>
+                </div>
+                <div class="picker-actions">
+                    <button type="button" class="btn-clear" id="clearDatesBtn">Limpar</button>
+                    <button type="button" class="btn-apply" id="applyDatesBtn">Definir Reserva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</dialog>

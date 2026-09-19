@@ -6,6 +6,7 @@
     <title>Painel de Gestão - SIBA Automation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ url_for('static', path='js/dashboard.js') }}"></script>
+    <link rel="stylesheet" href="/static/css/datepicker.css">
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 min-h-screen">
 
@@ -100,6 +101,8 @@
             </button>
         </div>
     </dialog>
+
+    {% include 'components/datepicker.html' %}
 
 </body>
 </html>
