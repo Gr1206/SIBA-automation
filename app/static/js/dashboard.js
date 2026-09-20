@@ -1,3 +1,5 @@
+import { NOTIFICATION_TEMPLATES, SEVERITY_STYLES } from './notificationsConfig.js';
+
 document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("newReservation");
     const t = document.getElementById("reservationsTable");
@@ -18,12 +20,133 @@ document.addEventListener("DOMContentLoaded", () => {
     const monthTitleB = document.getElementById("monthTitleB");
     const monthCalendarOne = document.getElementById("monthCalendarOne");
     const monthCalendarTwo = document.getElementById("monthCalendarTwo");
+    const notificationBtn = document.getElementById("notificationBtn");
+    const closeNotificationBtn = document.getElementById("closeNotificationBtn");
+    const drawerCount = document.getElementById("notDrawerCount");
+    const drawer = document.getElementById("notificationDrawer");
 
     let reservations = [];
     let targetReservation = null;
+    let editingReservationId = null;
     let selectedCheckInDate = null;
     let selectedCheckOutDate = null;
     let currentMonthCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+    function toggleNotificationDrawer() {
+        if (drawer.classList.contains("w-0")) {
+            // Abre o painel lateral
+            drawer.classList.remove("w-0");
+            drawer.classList.add("w-[350px]");
+        } else {
+            // Fecha o painel lateral
+            drawer.classList.remove("w-[350px]");
+            drawer.classList.add("w-0");
+        }
+    }
+
+    function renderNotificationItem(notification) {
+        const template = NOTIFICATION_TEMPLATES[notification.code] || NOTIFICATION_TEMPLATES.DEFAULT;
+        const styles = SEVERITY_STYLES[template.severity] || SEVERITY_STYLES.info;
+
+        return `
+            <div class="p-3.5 border rounded-lg transition-all ${styles.container} shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+                <h4 class="font-bold text-xs">${template.title}</h4>
+                <span class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${styles.badge}">
+                ${template.severity}
+                </span>
+            </div>
+            <p class="text-xs opacity-90 leading-relaxed mb-3">
+                ${template.description}
+            </p>
+            <div class="text-right">
+                <a href="${template.actionUrl}" 
+                class="text-xs font-semibold underline underline-offset-2 ${styles.btn} transition-colors">
+                ${template.actionText} &rarr;
+                </a>
+            </div>
+            </div>
+        `;
+    }
+    
+    function updateNotificationDrawerCount(count) {
+        if (!drawerCount) return;
+        if (count === 0) {
+            drawerCount.textContent = "0 Novas";
+            drawerCount.classList.add("hidden");
+        } else {
+            drawerCount.classList.remove("hidden");
+            drawerCount.textContent = `${count} Novas`;
+        }
+    }
+
+    function renderNotificationList(notifications) {
+        const container = document.getElementById("notificationsListContainer");
+        if (!container) return;
+
+        if (!notifications || notifications.length === 0) {
+            container.innerHTML = `
+            <div class="text-center py-8 text-slate-400">
+                <p class="text-xs">Não tem notificações pendentes.</p>
+            </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = notifications
+        .map(item => renderNotificationItem(item))
+        .join("");
+    }
+                
+
+    async function loadNotifications() {
+        try {
+            const response = await fetch("/notifications");
+            if (!response.ok) throw new Error("Falha ao obter notificações");
+
+            const responseData = await response.json();
+            const notifications = responseData.notifications || [];
+            updateNotificationDrawerCount(notifications.length);
+            // Atualiza o número no badge do sino
+            updateNotificationBadge(notifications.length);
+
+            // Renderiza a lista na gaveta
+            renderNotificationList(notifications);
+        } catch (error) {
+            console.error("Error fetching notifications:", error);
+        }
+        }
+
+    if (closeNotificationBtn) {
+        closeNotificationBtn.addEventListener("click", () => {
+            drawer.classList.remove("w-[350px]");
+            drawer.classList.add("w-0");
+        });
+    }
+    
+    function updateNotificationBadge(count) {
+        const badge = document.querySelector("#notificationBtn span");
+        if (!badge) return;
+
+        if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove("hidden");
+        } else {
+            badge.classList.add("hidden"); 
+        }
+    }
+
+    if (notificationBtn) {
+        notificationBtn.addEventListener("click", async () => {
+            // Abre a gaveta de imediato
+            toggleNotificationDrawer();
+
+            // Atualiza os dados
+            await loadNotifications();
+        });
+    }
+
+
 
     function formatDisplayDate(dateString) {
         if (!dateString) {
@@ -55,6 +178,23 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedCheckOutDate = null;
         updateDateSummary();
         renderDatePicker();
+    }
+
+    function openReservationDatePicker(reservation) {
+        editingReservationId = reservation.id;
+        selectedCheckInDate = reservation.check_in ? String(reservation.check_in).slice(0, 10) : null;
+        selectedCheckOutDate = reservation.check_out ? String(reservation.check_out).slice(0, 10) : null;
+
+        const referenceDate = selectedCheckInDate || selectedCheckOutDate;
+        if (referenceDate) {
+            const [year, month] = referenceDate.split("-").map(Number);
+            currentMonthCursor = new Date(year, month - 1, 1);
+        }
+
+        renderDatePicker();
+        if (dateDialog) {
+            dateDialog.showModal();
+        }
     }
 
     function buildCalendarDays(monthDate) {
@@ -204,12 +344,32 @@ document.addEventListener("DOMContentLoaded", () => {
         t.innerHTML = "";
         reservations.forEach((reservation) => {
             const row = document.createElement("tr");
-            row.className = "hover:bg-slate-50 transition-colors";
+            row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
+            row.dataset.reservationId = reservation.id;
+            row.addEventListener("click", (event) => {
+                if (event.target.closest("a, button, input, select, textarea")) {
+                    return;
+                }
+
+                openReservationDatePicker(reservation);
+            });
             row.innerHTML = `
                 <td class="py-3 px-4 text-center font-mono font-medium text-blue-600">${reservation.id}</td>
                 <td class="py-3 px-4 text-center font-medium text-slate-800">${reservation.guest_name}</td>
                 <td class="py-3 px-4 text-center">${reservation.guest_count}</td>
-                <td class="py-3 px-4 text-center">${reservation.check_in || "-"}</td>
+                <td class="py-3 px-4 text-center">${reservation.check_in || "-"}
+                   <button
+                        type="button"
+                        data-id="${reservation.id}"
+                        class="edit-dates-btn inline-flex items-center justify-center p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Editar datas da reserva"
+                        aria-label="Editar datas da reserva ${reservation.id}"
+                        >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </button>
+                </td>
                 <td class="py-3 px-4 text-center">${reservation.check_out || "-"}</td>
                 <td class="py-3 px-4 text-center">
                     <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
@@ -217,7 +377,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </span>
                 </td>
                 <td class="py-3 px-4 text-center space-x-2">
-                    <a href="/checkin/${reservation.id}" class="text-slate-600 hover:text-blue-600 font-medium">Link Forms</a>
+ 
+                    <a href="/checkin/${reservation.access_token}" class="text-slate-600 hover:text-blue-600 font-medium">Link Forms</a>
                     <button
                         type="button"
                         data-id="${reservation.id}"
@@ -287,6 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btn && dateDialog) {
         btn.addEventListener("click", (event) => {
             event.preventDefault();
+            editingReservationId = null;
             resetDateSelection();
             dateDialog.showModal();
         });
@@ -354,17 +516,24 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             try {
-                const res = await fetch("/api/reservations/", {
-                    method: "POST",
+                const isEditing = editingReservationId !== null;
+                const url = isEditing
+                    ? `/api/reservations/${editingReservationId}`
+                    : "/api/reservations/";
+                const res = await fetch(url, {
+                    method: isEditing ? "PATCH" : "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
+                    body: JSON.stringify(isEditing ? {
+                        check_in: checkInDate || null,
+                        check_out: checkOutDate || null
+                    } : {
                         guest_name: "Pending " + (reservations.length + 1),
                         guest_count: 1,
                         check_in: checkInDate || null,
                         check_out: checkOutDate || null,
-                        status: "Pending",
+                        status: "Pending"
                     })
                 });
 
@@ -376,10 +545,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                const novaReserva = await res.json();
-                reservations.push(novaReserva);
+                const savedReservation = await res.json();
+                if (isEditing) {
+                    reservations = reservations.map((reservation) =>
+                        String(reservation.id) === String(editingReservationId)
+                            ? savedReservation
+                            : reservation
+                    );
+                } else {
+                    reservations.push(savedReservation);
+                }
                 renderReservations();
                 resetDateSelection();
+                editingReservationId = null;
                 dateDialog.close();
             } catch (error) {
                 console.error("Error adding new reservation:", error);
@@ -409,16 +587,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (t) {
-        t.addEventListener("click", async (event) => {
+        t.addEventListener("click", (event) => {
+            const editDatesBtn = event.target.closest(".edit-dates-btn");
+            if (editDatesBtn) {
+                const reservation = reservations.find(
+                    (item) => String(item.id) === String(editDatesBtn.dataset.id)
+                );
+                if (reservation) {
+                    openReservationDatePicker(reservation);
+                }
+                return;
+            }
+
             const delBtn = event.target.closest(".delete-btn");
             if (delBtn) {
-                const reservationId = delBtn.dataset.id;
-                openDeleteModal(reservationId);
+                openDeleteModal(delBtn.dataset.id);
             }
         });
     }
 
     fetchReservations();
+    loadNotifications();
+
     renderDatePicker();
     window.addEventListener("pageshow", (event) => {
         if (event.persisted) {

@@ -31,8 +31,12 @@ def get_reservations(
 )
 def update_reservation(reservation_id: int, 
                        payload: ReservationUpdate, 
+                       user_id: int = Depends(current_user),
                        db: Session = Depends(get_db)):
-    reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    reservation = db.query(Reservation).filter(
+        Reservation.id == reservation_id,
+        Reservation.user_id == user_id
+    ).first()
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 

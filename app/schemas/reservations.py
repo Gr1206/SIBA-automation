@@ -17,6 +17,7 @@ class ReservationCreate(BaseModel):
 #frontend no GET
 class ReservationResponse(BaseModel):
     id: int
+    access_token: str
     #code: int = "Pending"
     guest_name: str = "Pending"
     guest_count: int = 1
@@ -30,6 +31,9 @@ class ReservationResponse(BaseModel):
 class ReservationUpdate(BaseModel):
     guest_name: Optional[str] = Field(default=None, alias="guestName")
     guest_count: Optional[int] = Field(default=None, alias="guestCount")
+    check_in: Optional[date] = Field(default=None, alias="checkIn")
+    check_out: Optional[date] = Field(default=None, alias="checkOut")
+    status: Optional[str] = None
 
     # isto faz: basicamente permite que o modelo aceite campos opcionais, e se algum campo não for fornecido, ele não será incluído no dicionário de saída. 
     # Isso é útil para atualizações parciais, onde você pode querer atualizar apenas alguns campos de um registro existente sem precisar fornecer todos os 

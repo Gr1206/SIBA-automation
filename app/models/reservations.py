@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter
 from datetime import date
 from sqlalchemy import Column, Date, ForeignKey, Integer, String
@@ -11,6 +12,7 @@ class Reservation(Base):
     __tablename__ = "reservations"
 
     id = Column(Integer, primary_key=True, index=True)
+    access_token = Column(String, default=lambda: str(uuid.uuid4()), unique=True, index=True, nullable=False)
     #code = Column(Integer, unique=True, index=True)
     guest_name = Column(String, index=True)
     guest_count = Column(Integer)
