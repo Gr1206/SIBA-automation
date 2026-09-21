@@ -22,5 +22,6 @@ class Reservation(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     user = relationship("User", back_populates="reservations")
+    forms = relationship("Form", back_populates="reservation", cascade="all, delete-orphan")  # One-to-one relationship with Form
 #eventualmente vou ter de colocar um sitio para guardar os ficheiros enviados
 #nao quero ficar com os dados específicos das pessoas

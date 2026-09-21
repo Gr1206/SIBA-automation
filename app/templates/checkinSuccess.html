@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ titulo|default("Check-in concluído") }} | SIBA Automation</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-4 font-sans">
+	<main class="w-full max-w-md">
+		<div class="mb-6 flex items-center justify-center gap-2 font-bold text-xl tracking-tight text-blue-600">
+			<svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+			</svg>
+			<span>SIBA<span class="text-slate-900">Automation</span></span>
+		</div>
+
+		<section class="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10" aria-labelledby="success-title">
+			<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/60">
+				<svg class="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+				</svg>
+			</div>
+
+			<p class="mt-8 text-xs font-semibold uppercase tracking-wider text-emerald-600">Submissão concluída</p>
+			<h1 id="success-title" class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+				Obrigado pelo seu check-in
+			</h1>
+			<p class="mt-3 text-sm leading-6 text-slate-600">
+				Os seus dados foram submetidos com sucesso e ficaram registados para comunicação ao SIBA.
+			</p>
+
+			{% if reserva_id %}
+			<div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left">
+				<p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Referência da reserva</p>
+				<p class="mt-1 font-mono text-sm font-semibold text-blue-600">{{ reserva_id }}</p>
+			</div>
+			{% endif %}
+
+			<div class="mt-8 space-y-3">
+				<a href="/" class="block w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+					Voltar à página inicial
+				</a>
+				
+			</div>
+		</section>
+
+		<p class="mt-6 text-center text-xs text-slate-500">Pode fechar esta janela com segurança.</p>
+	</main>
+</body>
+</html>

@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routes import checkin, dashboard, reservations, profile, login, register, notifications
+from app.routes import checkin, dashboard, reservations, profile, login, register, notifications, forms
 from app.core.templates import templates
 from app.db.session import engine, Base
 from app.exceptions.expiredSession import SessionExpiredException
@@ -23,6 +23,7 @@ app.include_router(profile.router)
 app.include_router(login.router)
 app.include_router(register.router)
 app.include_router(notifications.router)
+app.include_router(forms.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
@@ -30,6 +31,14 @@ async def root(request: Request):
         request=request,
         name="landing.html", 
         context={"titulo": "Bem-vindo ao SIBA"}
+    )
+
+@app.get("/checkinSuccess/", response_class=HTMLResponse)
+async def checkin_success(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="checkinSuccess.html",
+        context={"titulo": "Check-in concluído"}
     )
 
 @app.exception_handler(SessionExpiredException)

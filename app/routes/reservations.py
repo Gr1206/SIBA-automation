@@ -1,5 +1,3 @@
-import random
-import string
 from typing import List
 from fastapi import APIRouter, Cookie, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -29,14 +27,16 @@ def get_reservations(
     response_model=ReservationResponse,
     summary="Atualizar uma reserva existente"
 )
-def update_reservation(reservation_id: int, 
+def update_reservation(reservation_id: str,
                        payload: ReservationUpdate, 
                        user_id: int = Depends(current_user),
                        db: Session = Depends(get_db)):
-    reservation = db.query(Reservation).filter(
-        Reservation.id == reservation_id,
-        Reservation.user_id == user_id
-    ).first()
+    reservation_query = db.query(Reservation).filter(Reservation.user_id == user_id)
+    if reservation_id.isdigit():
+        reservation = reservation_query.filter(Reservation.id == int(reservation_id)).first()
+    else:
+        reservation = reservation_query.filter(Reservation.access_token == reservation_id).first()
+
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
