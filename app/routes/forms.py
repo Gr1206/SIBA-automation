@@ -23,6 +23,11 @@ def store_forms(
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
+    forms = db.query(Form).filter(Form.reservation_id == reservation.id).all()
+    if forms:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Formulários já foram submetidos para esta reserva")
+
+
     created_forms = [
         Form(reservation_id=reservation.id, **guest.model_dump())
         for guest in payload.guests
