@@ -6,7 +6,7 @@ class GuestItem(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     full_name: str = Field(..., description="Nome completo do hóspede")
-    birth_date: date = Field(..., description="Data de nascimento do hóspede")
+    birth_date: str = Field(..., description="Data de nascimento do hóspede")
     nationality: str = Field(..., description="Nacionalidade do hóspede")
     country_of_residence: str = Field(..., description="País de residência do hóspede")
     city_of_residence: str = Field(..., description="Cidade de residência do hóspede")

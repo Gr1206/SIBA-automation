@@ -20,6 +20,13 @@ export const NOTIFICATION_TEMPLATES = {
     actionUrl: "/profile",
     actionText: "Registar Chave"
   },
+  MISSING_PROPERTY_INFO: {
+    title: "Informações da Propriedade em Falta",
+    description: "Complete os detalhes da sua propriedade para uma melhor gestão.",
+    severity: "warning",
+    actionUrl: "/profile",
+    actionText: "Atualizar Informações"
+  },
   // Template de fallback se aparecer um código desconhecido
   DEFAULT: {
     title: "Aviso do Sistema",

@@ -17,9 +17,15 @@ SIBA_ENCRYPT_KEY = os.getenv("SIBA_ENCRYPT_KEY")
 if not SIBA_ENCRYPT_KEY:
     raise ValueError("SIBA_ENCRYPT_KEY is not set in the environment variables.")
 
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+if not ENCRYPTION_KEY:
+    raise ValueError("ENCRYPTION_KEY is not set in the environment variables.")
+
 signer = URLSafeSerializer(SECRET_KEY)
 
 fernet = Fernet(SIBA_ENCRYPT_KEY.encode() if isinstance(SIBA_ENCRYPT_KEY, str) else SIBA_ENCRYPT_KEY)
+
+fernet_encryptor = Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
 
 password_hasher = PasswordHash.recommended()
 
@@ -70,3 +76,31 @@ def decrypt_sibaKey(encrypted_key: str) -> str:
     if not encrypted_key:
         return None
     return fernet.decrypt(encrypted_key.encode("utf-8")).decode("utf-8")
+
+
+def encrypt_data(data: str) -> str:
+    """
+    Encrypt the given data using Fernet symmetric encryption.
+    """
+    if not data:
+        return None
+    return fernet_encryptor.encrypt(data.encode("utf-8")).decode("utf-8")
+
+def decrypt_data(encrypted_data: str) -> str:
+    """
+    Decrypt the given encrypted data using Fernet symmetric encryption.
+    """
+    if not encrypted_data:
+        return None
+    return fernet_encryptor.decrypt(encrypted_data.encode("utf-8")).decode("utf-8")
+
+def decrypt_dataList(ency_dataList : list[str]) -> list[str]:
+    """
+    Decrypt a list of encrypted data using Fernet symmetric encryption.
+    """
+    if not ency_dataList:
+        return None
+    decrypted_list = []
+    for ency_data in ency_dataList:
+        decrypted_list.append(fernet_encryptor.decrypt(ency_data.encode("utf-8")).decode("utf-8"))
+    return decrypted_list

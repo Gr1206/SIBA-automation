@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from app.core.templates import templates
 from app.utils.sec import current_user, encrypt_sibaKey
-
+from app.services.xml_builder import getPropertyData
 
 from app.db.session import get_db
 from app.models.login import User
@@ -51,9 +51,12 @@ def update_profile(
         profile.hashed_sibaKey = encrypt_sibaKey(raw_key)
     for key, value in data.items():
         setattr(profile, key, value)
+    
 
     db.commit()
     db.refresh(profile)
+
+    print(getPropertyData(db, profile.id))  
     
     return profile
 
