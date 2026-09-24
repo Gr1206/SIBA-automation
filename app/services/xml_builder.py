@@ -1,8 +1,9 @@
 import datetime
 import unicodedata
-
+from datetime import datetime
 from app.models.login import User
 from app.utils.sec import decrypt_data
+from app.utils.helpers import get_next_file_number
 from app.db.session import get_db
 from app.models.forms import Form
 from app.models.reservations import Reservation
@@ -74,23 +75,29 @@ def getPropertyData(db: Session, user_id: int) -> str:
             "postal_code": sanitize_text(user_data.postal_code),
             "postal_zone": sanitize_text(user_data.postal_zone),
             "telephone": sanitize_text(user_data.telephone),
-            "check_in_time": sanitize_text(user_data.check_in_time),
-            "check_out_time": sanitize_text(user_data.check_out_time),
             "fax": "", ##never used by anyone
             "contact_name": sanitize_text(user_data.contact_name)
         }
     return None
 
 def getReservationData(db: Session, reservation_id: int) -> str:
-    pass
+    reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not reservation:
+        return None
+    next_filenum = get_next_file_number(db, reservation.user_id)
+    date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    return {
+        "file_number": next_filenum,
+        "date": date
+    }  
+    
 
 def getFormsData(db: Session, reservation_id: int) -> list[dict]:
     all_guests = db.query(Form).filter(Form.reservation_id == reservation_id).all()
     reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
 
-    ##PRECISO DE METER OS HH:MM:SS para as horas fixas de checkin e checkout da propriedade
     check_in_time = format_siba_datetime(reservation.check_in, "00:00:00") if reservation and reservation.check_in else ""
-    check_out_time = format_siba_datetime(reservation.check_out, "00:00:00") if reservation and reservation and reservation.check_out else ""
+    check_out_time = format_siba_datetime(reservation.check_out, "00:00:00") if reservation and reservation and reservation.check_out else None
     forms_data = []
     for guest in all_guests:
         birth_date = format_siba_datetime(decrypt_data(guest.birth_date), "00:00:00") if guest and guest.birth_date else ""

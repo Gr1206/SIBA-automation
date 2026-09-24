@@ -1,4 +1,4 @@
-""" 
+
 import datetime
 from datetime import datetime
 from app.db.session import Base
@@ -14,4 +14,4 @@ class Submission(Base):
     status = Column(String, default="pending")
     response_code = Column(String, nullable=True)
 
-     """
+    
