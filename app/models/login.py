@@ -31,6 +31,8 @@ class User(Base):
 
     telephone = Column(String, nullable=True)
     contact_name = Column(String, nullable=True)
+    check_in_time = Column(String, nullable=True)
+    check_out_time = Column(String, nullable=True)
 
 
     reservations = relationship("Reservation", back_populates="user")

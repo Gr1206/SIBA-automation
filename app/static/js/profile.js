@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("postalZone").value = profileData.postal_zone || "";
             document.getElementById("telephone").value = profileData.telephone || "";
             document.getElementById("contactName").value = profileData.contact_name || "";
+            document.getElementById("checkInTime").value = profileData.check_in_time || "";
+            document.getElementById("checkOutTime").value = profileData.check_out_time || "";
         } catch (error) {
             console.error("Error fetching profile data:", error);
         }
@@ -53,6 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const postalZone = document.getElementById("postalZone").value;
             const telephone = document.getElementById("telephone").value;
             const contactName = document.getElementById("contactName").value;
+            const checkInTime = document.getElementById("checkInTime").value;
+            const checkOutTime = document.getElementById("checkOutTime").value;
+
+            if (!checkInTime || !checkOutTime) {
+                alert("Selecione as horas de check-in e check-out.");
+                return;
+            }
+
             const response = await fetch("/profile", {
                 method: "PATCH",
                 headers: {
@@ -72,7 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     postal_code: postalCode,
                     postal_zone: postalZone,
                     telephone,
-                    contact_name: contactName
+                    contact_name: contactName,
+                    check_in_time: checkInTime,
+                    check_out_time: checkOutTime
                 })
             });
 

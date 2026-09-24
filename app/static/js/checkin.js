@@ -40,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Elementos do DOM
     const tabsContainer = document.getElementById("tabs-container");
     const formCheckin = document.getElementById("form-checkin");
     const inputNome = document.getElementById("campo-nome");
@@ -55,9 +54,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnRemove = document.getElementById("btn-remove-hospede");
     const btnAnterior = document.getElementById("btn-anterior");
     const btnSeguinte = document.getElementById("btn-seguinte");
-    const btnFinalizar = document.getElementById("checkin");
 
-    //Save array & localStorage
+    preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Selecione uma nacionalidade");
+    preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
+    preencherSelect(inputPaisEmissao, window.SIBA_COUNTRIES, "Selecione um país");
+
+    function preencherSelect(select, options, placeholder) {
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        options.forEach(({ code, name }) => {
+            const option = document.createElement("option");
+            option.value = code;
+            option.textContent = `${name} (${code})`;
+            select.appendChild(option);
+        });
+    }
+
     async function salvarAtual() {
         if (hospedes[indiceAtual]) {
             hospedes[indiceAtual].full_name = inputNome.value;
@@ -70,12 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
             hospedes[indiceAtual].country_of_issue = inputPaisEmissao.value;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(hospedes));
         }
-        
     }
 
-    // Render form & guest
     function renderizar() {
-        
         const atual = hospedes[indiceAtual];
         inputNome.value = atual ? atual.full_name || atual.nome || "" : "";
         inputNascimento.value = atual ? atual.birth_date || atual.nascimento || "" : "";
@@ -86,47 +94,43 @@ document.addEventListener("DOMContentLoaded", () => {
         inputDoc.value = atual ? atual.id_number || atual.documento || "" : "";
         inputPaisEmissao.value = atual ? atual.country_of_issue || atual.paisEmissao || "" : "";
 
-        // button state
         btnAnterior.disabled = indiceAtual === 0;
         btnAnterior.classList.toggle("opacity-50", indiceAtual === 0);
-
         btnSeguinte.disabled = indiceAtual === hospedes.length - 1;
         btnSeguinte.classList.toggle("opacity-50", indiceAtual === hospedes.length - 1);
 
-        // containers with guest number
         tabsContainer.innerHTML = "";
         hospedes.forEach((_, idx) => {
             const tab = document.createElement("button");
             tab.type = "button";
             tab.textContent = `Hóspede ${idx + 1}`;
             tab.className = `text-xs px-3 py-1 rounded-full font-medium transition-colors ${
-                idx === indiceAtual 
-                    ? "bg-blue-600 text-white" 
+                idx === indiceAtual
+                    ? "bg-blue-600 text-white"
                     : "bg-slate-200 text-slate-700 hover:bg-slate-300"
             }`;
             tab.addEventListener("click", () => {
                 salvarAtual();
-                indiceAtual = idx; //new guest chosen
+                indiceAtual = idx;
                 renderizar();
             });
             tabsContainer.appendChild(tab);
         });
     }
 
-    //receives the guest list without the removed guest and updates localStorage
     function removeGuest(guestList) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(guestList));
     }
 
-    //clicks
     inputNome.addEventListener("input", salvarAtual);
     inputNascimento.addEventListener("input", salvarAtual);
-    inputNacionalidade.addEventListener("input", salvarAtual);
-    inputPaisResidencia.addEventListener("input", salvarAtual);
+    inputNacionalidade.addEventListener("change", salvarAtual);
+    inputPaisResidencia.addEventListener("change", salvarAtual);
     inputCidadeResidencia.addEventListener("input", salvarAtual);
     inputTipoDocumento.addEventListener("change", salvarAtual);
     inputDoc.addEventListener("input", salvarAtual);
-    inputPaisEmissao.addEventListener("input", salvarAtual);
+    inputPaisEmissao.addEventListener("change", salvarAtual);
+
     btnRemove.addEventListener("click", async () => {
         if (hospedes.length > 1) {
             hospedes.splice(indiceAtual, 1);
@@ -138,10 +142,11 @@ document.addEventListener("DOMContentLoaded", () => {
             await salvarAtual();
         }
     });
+
     btnAdd.addEventListener("click", () => {
         salvarAtual();
         hospedes.push(criarHospede());
-        indiceAtual = hospedes.length - 1; //new guest
+        indiceAtual = hospedes.length - 1;
         renderizar();
     });
 
@@ -185,16 +190,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             localStorage.removeItem(STORAGE_KEY);
             alert("Check-in realizado com sucesso!");
-            window.location.href = "/checkinSuccess/"; 
-        }
-        catch (error) {
+            window.location.href = "/checkinSuccess/";
+        } catch (error) {
             console.error("Erro ao enviar os dados:", error);
             alert("Ocorreu um erro ao enviar os dados. Por favor, tente novamente.");
-            return;
         }
-
     });
 
-    
     renderizar();
 });

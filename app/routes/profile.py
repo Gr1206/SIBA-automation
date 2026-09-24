@@ -45,16 +45,23 @@ def update_profile(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
 
     data = payload.model_dump(exclude_unset=True)
+    print(f"Profile update payload: {data}")
 
+    if not payload.check_in_time or not payload.check_out_time:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="check_in_time and check_out_time are required",
+        )
+    
     if "siba_key" in data and data["siba_key"]:
         raw_key = data.pop("siba_key")
         profile.hashed_sibaKey = encrypt_sibaKey(raw_key)
     for key, value in data.items():
         setattr(profile, key, value)
-    
 
     db.commit()
     db.refresh(profile)
+    print(f"Saved property times: {profile.check_in_time}, {profile.check_out_time}")
 
     print(getPropertyData(db, profile.id))  
     

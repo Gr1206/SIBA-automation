@@ -6,6 +6,7 @@ from app.models.forms import Form
 from app.models.reservations import Reservation
 from app.schemas.forms import FormCreateRequest
 from app.utils.sec import encrypt_data, decrypt_data
+from app.services.xml_builder import getFormsData
 
 router = APIRouter(prefix="/forms", tags=["Forms"])
 
@@ -29,9 +30,10 @@ def store_forms(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Formulários já foram submetidos para esta reserva")
 
     count = 0
+    
     for guest in payload.guests:
         guest_data = guest.model_dump()
-
+        print(guest_data["birth_date"])
         guest_data["full_name"] = encrypt_data(guest_data["full_name"])
         guest_data["birth_date"] = encrypt_data(guest_data["birth_date"])
         guest_data["nationality"] = encrypt_data(guest_data["nationality"])
@@ -48,13 +50,17 @@ def store_forms(
         db.add(new_form)
         count += 1
 
+
     reservation.status = "Completed"
     reservation.guest_name = payload.guests[0].full_name
     reservation.guest_count = count
+
+
     try:
         db.commit()
     except Exception:
         db.rollback()
         raise
+    print(getFormsData(db, reservation.id)) 
 
     return {"message": "Formulários armazenados com sucesso", "count": {count}}

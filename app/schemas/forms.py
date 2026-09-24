@@ -7,12 +7,12 @@ class GuestItem(BaseModel):
 
     full_name: str = Field(..., description="Nome completo do hóspede")
     birth_date: str = Field(..., description="Data de nascimento do hóspede")
-    nationality: str = Field(..., description="Nacionalidade do hóspede")
-    country_of_residence: str = Field(..., description="País de residência do hóspede")
+    nationality: str = Field(..., pattern=r"^[A-Z]{3}$", description="Código ISO 3166-1 alfa-3 da nacionalidade")
+    country_of_residence: str = Field(..., pattern=r"^[A-Z]{3}$", description="Código ISO 3166-1 alfa-3 do país de residência")
     city_of_residence: str = Field(..., description="Cidade de residência do hóspede")
     id_type: str = Field(..., description="Tipo de documento de identificação")
     id_number: str = Field(..., description="Número do documento de identificação")
-    country_of_issue: str = Field(..., description="País de emissão do documento de identificação")
+    country_of_issue: str = Field(..., pattern=r"^[A-Z]{3}$", description="Código ISO 3166-1 alfa-3 do país emissor")
 
 
 

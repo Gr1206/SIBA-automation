@@ -99,7 +99,7 @@ def decrypt_dataList(ency_dataList : list[str]) -> list[str]:
     Decrypt a list of encrypted data using Fernet symmetric encryption.
     """
     if not ency_dataList:
-        return None
+        return []
     decrypted_list = []
     for ency_data in ency_dataList:
         decrypted_list.append(fernet_encryptor.decrypt(ency_data.encode("utf-8")).decode("utf-8"))

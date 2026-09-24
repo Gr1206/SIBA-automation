@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titulo }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="{{ url_for('static', path='js/checkin.js') }}?v=6"></script>
+    <script src="{{ url_for('static', path='js/countries.js') }}?v=1"></script>
+    <script src="{{ url_for('static', path='js/nationalities.js') }}?v=1"></script>
+    <script defer src="{{ url_for('static', path='js/checkin.js') }}?v=9"></script>
 </head>
 <body class="bg-slate-100 min-h-screen p-4 flex items-center justify-center font-sans">
 
@@ -33,11 +35,11 @@
                 </div>
                 <div>
                     <label for="campo-nacionalidade" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nacionalidade</label>
-                    <input type="text" id="campo-nacionalidade" name="nationality" list="lista-paises" autocomplete="country-name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <select id="campo-nacionalidade" name="nationality" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
                 <div>
                     <label for="campo-pais-residencia" class="block text-xs font-semibold uppercase text-slate-600 mb-1">País de Residência Habitual</label>
-                    <input type="text" id="campo-pais-residencia" name="country_of_residence" list="lista-paises" autocomplete="country-name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <select id="campo-pais-residencia" name="country_of_residence" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
                 <div>
                     <label for="campo-cidade-residencia" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cidade/Localidade de Residência</label>
@@ -59,21 +61,9 @@
                 </div>
                 <div>
                     <label for="campo-pais-emissao" class="block text-xs font-semibold uppercase text-slate-600 mb-1">País Emissor do Documento</label>
-                    <input type="text" id="campo-pais-emissao" name="country_of_issue" list="lista-paises" autocomplete="country-name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <select id="campo-pais-emissao" name="country_of_issue" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
             </div>
-
-            <datalist id="lista-paises">
-                <option value="Portugal"></option>
-                <option value="Espanha"></option>
-                <option value="França"></option>
-                <option value="Alemanha"></option>
-                <option value="Reino Unido"></option>
-                <option value="Brasil"></option>
-                <option value="Angola"></option>
-                <option value="Moçambique"></option>
-                <option value="Estados Unidos da América"></option>
-            </datalist>
 
         <!-- Navegação Anterior / Seguinte -->
         <div class="flex gap-3 pt-2">

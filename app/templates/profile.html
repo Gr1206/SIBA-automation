@@ -188,17 +188,39 @@
               <label for="city" class="block text-xs uppercase font-medium text-slate-500 mb-1">Cidade</label>
               <input type="text" id="city" name="city" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
             </div>
-            <div>
-              <label for="postalCode" class="block text-xs uppercase font-medium text-slate-500 mb-1">Código postal</label>
-              <input type="text" id="postalCode" name="postal_code" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-            </div>
-            <div>
-              <label for="postalZone" class="block text-xs uppercase font-medium text-slate-500 mb-1">Zona postal</label>
-              <input type="text" id="postalZone" name="postal_zone" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+            <div class="sm:col-span-2">
+              <label class="block text-xs uppercase font-medium text-slate-500 mb-1">Código postal</label>
+              <div class="flex items-end gap-2 max-w-sm">
+                <input type="text" id="postalCode" name="postal_code" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" aria-label="Código postal" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 4)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                <span class="pb-2 text-slate-500" aria-hidden="true">-</span>
+                <input type="text" id="postalZone" name="postal_zone" inputmode="numeric" pattern="[0-9]{3}" minlength="3" maxlength="3" aria-label="Zona postal" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 3)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+              </div>
             </div>
             <div>
               <label for="telephone" class="block text-xs uppercase font-medium text-slate-500 mb-1">Telefone</label>
               <input type="tel" id="telephone" name="telephone" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+            </div>
+            <div>
+              <label for="checkInTime" class="block text-xs uppercase font-medium text-slate-500 mb-1">Hora de check-in</label>
+              <select id="checkInTime" name="check_in_time" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                <option value="">Selecionar hora</option>
+                {% for hour in range(24) %}
+                  {% for minute in [0, 15, 30, 45] %}
+                <option value="{{ '%02d:%02d'|format(hour, minute) }}">{{ '%02d:%02d'|format(hour, minute) }}</option>
+                  {% endfor %}
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="checkOutTime" class="block text-xs uppercase font-medium text-slate-500 mb-1">Hora de check-out</label>
+              <select id="checkOutTime" name="check_out_time" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                <option value="">Selecionar hora</option>
+                {% for hour in range(24) %}
+                  {% for minute in [0, 15, 30, 45] %}
+                <option value="{{ '%02d:%02d'|format(hour, minute) }}">{{ '%02d:%02d'|format(hour, minute) }}</option>
+                  {% endfor %}
+                {% endfor %}
+              </select>
             </div>
           </div>
         </div>
@@ -222,6 +244,6 @@
 
   </main>
 
-  <script src="/static/js/profile.js"></script>
+  <script src="/static/js/profile.js?v=2"></script>
 </body>
 </html>

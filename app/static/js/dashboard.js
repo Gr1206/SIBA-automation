@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
             totalReserv.textContent = reservations.length;
         }
 
-        const pendingCount = reservations.filter(r => r.status === "Pending").length;
+        const pendingCount = reservations.filter(r => r.status === "Pending" || r.status === "Completed").length;
         if (totalPend) {
             totalPend.textContent = pendingCount;
         }

@@ -16,6 +16,8 @@ class ProfileResponse(BaseModel):
     postal_zone: str | None = None
     telephone: str | None = None
     contact_name: str | None = None
+    check_in_time: str | None = None
+    check_out_time: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -34,6 +36,8 @@ class ProfileUpdate(BaseModel):
     postal_zone: str | None = Field(default=None, alias="postal_zone")
     telephone: str | None = Field(default=None, alias="telephone")
     contact_name: str | None = Field(default=None, alias="contact_name")
+    check_in_time: str | None = Field(default=None, alias="check_in_time")
+    check_out_time: str | None = Field(default=None, alias="check_out_time")
 
 
     model_config = ConfigDict(populate_by_name=True)
