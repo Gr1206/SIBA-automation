@@ -6,8 +6,9 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routes import checkin, dashboard, reservations, profile, login, register, notifications, forms
 from app.core.templates import templates
-from app.db.session import engine, Base, ensure_user_profile_columns
+from app.db.session import engine, Base, ensure_user_profile_columns, SessionLocal
 from app.exceptions.expiredSession import SessionExpiredException
+from app.models.reservations import Reservation
 
 Base.metadata.create_all(bind=engine) 
 ensure_user_profile_columns()
@@ -36,11 +37,31 @@ async def root(request: Request):
     )
 
 @app.get("/checkinSuccess/", response_class=HTMLResponse)
-async def checkin_success(request: Request):
+async def checkin_success(request: Request, token: str | None = None):
+    contact_phone = "[inserir telefone do alojamento]"
+    contact_email = "[inserir email do alojamento]"
+    contact_address = "[inserir morada do alojamento]"
+
+    if token:
+        db = SessionLocal()
+        try:
+            reservation = db.query(Reservation).filter(Reservation.access_token == token).first()
+            if reservation and reservation.user:
+                contact_phone = reservation.user.telephone or contact_phone
+                contact_email = reservation.user.email or contact_email
+                contact_address = reservation.user.address or contact_address
+        finally:
+            db.close()
+
     return templates.TemplateResponse(
         request=request,
         name="checkinSuccess.html",
-        context={"titulo": "Check-in concluído"}
+        context={
+            "titulo": "Check-in concluído",
+            "contact_phone": contact_phone,
+            "contact_email": contact_email,
+            "contact_address": contact_address,
+        }
     )
 
 @app.exception_handler(SessionExpiredException)

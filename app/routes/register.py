@@ -46,6 +46,7 @@ def register_user(credentials: RegisterRequest, response: Response, request: Req
         key="user_id",
         value=cookie_value,
         httponly=True,
+        secure=True,
         max_age= 3600 * 24,
         samesite="lax",
         path="/",

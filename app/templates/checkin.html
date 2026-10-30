@@ -49,10 +49,9 @@
                     <label for="campo-tipo-doc" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tipo de Documento</label>
                     <select id="campo-tipo-doc" name="id_type" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">Selecione uma opção</option>
-                        <option value="passport">Passaporte</option>
-                        <option value="eu_id">Cartão de Cidadão / BI UE</option>
-                        <option value="residence_permit">Título de Residência</option>
-                        <option value="other">Outro</option>
+                        <option value="P">Passaporte</option>
+                        <option value="B">Cartão de Cidadão / BI UE</option>
+                        <option value="O">Outro</option>
                     </select>
                 </div>
                 <div>
@@ -75,10 +74,11 @@
             </button>
         </div>
 
-            <label class="flex items-start gap-2 text-sm text-slate-600">
-                <input id="consentimento" name="consent" type="checkbox" required class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                <span>Consinto no tratamento dos meus dados pessoais para os efeitos legais do SEF/SIBA.</span>
-            </label>
+
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-xs leading-6 text-slate-700">
+                <p class="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">Nota de privacidade e base legal</p>
+                <p>Os dados recolhidos neste formulário destinam-se exclusivamente ao cumprimento da obrigação legal de comunicação de alojamento ao Sistema de Informação de Boletins de Alojamento (SIBA / AIMA), nos termos da Lei n.º 23/2007. O tratamento é realizado ao abrigo do Art.º 6.º, n.º 1, al. c) do RGPD (cumprimento de obrigação jurídica). Os dados serão conservados apenas pelo período legal estipulado. Para exercer os seus direitos de acesso, retificação ou apagamento, contacte [inserir email do alojamento].</p>
+            </div>
 
             <button id="checkin" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
                 Concluir Check-in

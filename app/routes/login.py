@@ -35,6 +35,7 @@ def login_user(credentials: LoginRequest, response: Response, db = Depends(get_d
         key="user_id", 
         value=cookie_value, 
         httponly=True,
+        secure=True,
         max_age= 3600 * 24, 
         samesite="lax",
         path="/",

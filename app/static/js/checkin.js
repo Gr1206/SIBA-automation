@@ -189,8 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(`Erro ao enviar os dados (${response.status}): ${errorBody}`);
             }
             localStorage.removeItem(STORAGE_KEY);
-            alert("Check-in realizado com sucesso!");
-            window.location.href = "/checkinSuccess/";
+            window.location.href = "/checkinSuccess/?token=" + encodeURIComponent(token);
         } catch (error) {
             console.error("Erro ao enviar os dados:", error);
             alert("Ocorreu um erro ao enviar os dados. Por favor, tente novamente.");

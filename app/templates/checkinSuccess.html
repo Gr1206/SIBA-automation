@@ -27,7 +27,7 @@
 				Obrigado pelo seu check-in
 			</h1>
 			<p class="mt-3 text-sm leading-6 text-slate-600">
-				Os seus dados foram submetidos com sucesso e ficaram registados para comunicação ao SIBA.
+				Os seus dados foram submetidos com sucesso e ficaram registados para comunicação ao SIBA / AIMA.
 			</p>
 
 			{% if reserva_id %}
@@ -37,12 +37,15 @@
 			</div>
 			{% endif %}
 
-			<div class="mt-8 space-y-3">
-				<a href="/" class="block w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-					Voltar à página inicial
-				</a>
-				
+			<div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-left">
+				<p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Contactos do alojamento</p>
+				<ul class="mt-3 space-y-2 text-sm text-slate-700">
+					<li><span class="font-medium text-slate-800">Telefone de suporte/emergência:</span> {{ contact_phone }}</li>
+					<li><span class="font-medium text-slate-800">E-mail de contacto:</span> {{ contact_email }}</li>
+					<li><span class="font-medium text-slate-800">Morada do alojamento:</span> {{ contact_address }}</li>
+				</ul>
 			</div>
+
 		</section>
 
 		<p class="mt-6 text-center text-xs text-slate-500">Pode fechar esta janela com segurança.</p>
