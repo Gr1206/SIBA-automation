@@ -343,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         t.innerHTML = "";
         reservations.forEach((reservation) => {
+            const isCompleted = String(reservation.status || "").trim().toLowerCase() === "completed";
             const row = document.createElement("tr");
             row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
             row.dataset.reservationId = reservation.id;
@@ -378,7 +379,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
                 <td class="py-3 px-4 text-center space-x-2">
  
-                    <a href="/checkin/${reservation.access_token}" class="text-slate-600 hover:text-blue-600 font-medium">Link Forms</a>
+                    <a
+                        href="${isCompleted
+                            ? `/checkin/edit/${reservation.access_token}`
+                            : `/checkin/${reservation.access_token}`}"
+                        class="${isCompleted
+                            ? "text-emerald-600 hover:text-emerald-800"
+                            : "text-slate-600 hover:text-blue-600"} font-medium"
+                    >${isCompleted ? "Editar" : "Link Forms"}</a>
                     <button
                         type="button"
                         data-id="${reservation.id}"

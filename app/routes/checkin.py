@@ -8,6 +8,26 @@ from app.utils.sec import current_user
 
 router = APIRouter(prefix="/checkin", tags=["Check-in"])
 
+@router.get("/edit/{token}", response_class=HTMLResponse)
+async def edit_checkin(request: Request, token: str,
+                       db: Session = Depends(get_db)):
+    reservation = db.query(Reservation).filter(
+        Reservation.access_token == token
+    ).first()
+
+    if not reservation:
+        raise HTTPException(status_code=403, detail="Acesso negado.")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="checkin.html",
+        context={
+            "titulo": "Editar Check-in",
+            "reserva_id": reservation.id,
+            "host_allowed": reservation,
+        }
+    )
+
 @router.get("/{token}", response_class=HTMLResponse) #fica como /checkin/
 async def checkin(request: Request, token: str, 
                   db: Session = Depends(get_db)):
@@ -27,5 +47,9 @@ async def checkin(request: Request, token: str,
     return templates.TemplateResponse(
         request=request,
         name="checkin.html",
-        context={"reserva_id": host_allowed.id, "host_allowed": host_allowed}
+        context={
+            "titulo": "Boletim de Alojamento (SIBA)",
+            "reserva_id": host_allowed.id,
+            "host_allowed": host_allowed,
+        }
     )

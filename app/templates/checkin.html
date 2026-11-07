@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo }}</title>
+    <title>{{ titulo|default("Boletim de Alojamento (SIBA)") }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ url_for('static', path='js/countries.js') }}?v=1"></script>
     <script src="{{ url_for('static', path='js/nationalities.js') }}?v=1"></script>

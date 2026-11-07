@@ -34,13 +34,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return `siba_hospedes_draft_${obterTokenReserva()}`;
     }
 
-    function carregarHospedes() {
+    async function carregarHospedes() {
         const rascunho = lerRascunho();
         if (rascunho) {
             return rascunho.map(normalizarHospede);
         }
 
-        return [criarHospede()];
+        const token = obterTokenReserva();
+        const response = await fetch(`/forms/get/${encodeURIComponent(token)}`);
+
+        if (response.status === 404) {
+            return [criarHospede()];
+        }
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Erro ao carregar os dados (${response.status}): ${errorBody}`);
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data.guests) || data.guests.length === 0) {
+            return [criarHospede()];
+        }
+
+        return data.guests.map(normalizarHospede);
     }
 
     function normalizarHospede(hospede) {
@@ -211,6 +228,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    hospedes = carregarHospedes();
-    renderizar();
+    carregarHospedes()
+        .then((hospedesCarregados) => {
+            hospedes = hospedesCarregados;
+            renderizar();
+        })
+        .catch((error) => {
+            console.error("Erro ao carregar os dados guardados:", error);
+            hospedes = [criarHospede()];
+            renderizar();
+        });
 });

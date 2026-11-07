@@ -25,12 +25,6 @@ def store_forms(
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
-    if reservation.status == "Completed":
-        raise HTTPException(
-            status_code=status.HTTP_410_GONE,
-            detail="Este link de formulário já não está ativo."
-        )
-
     db.query(Form).filter(Form.reservation_id == reservation.id).delete(
         synchronize_session=False
     )
@@ -83,12 +77,6 @@ def get_forms(reservation_token: str, db: Session = Depends(get_db)):
 
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
-
-    if reservation.status == "Completed":
-        raise HTTPException(
-            status_code=status.HTTP_410_GONE,
-            detail="Este link de formulário já não está ativo."
-        )
 
     forms = db.query(Form).filter(Form.reservation_id == reservation.id).all()
     if not forms:
