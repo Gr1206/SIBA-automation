@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.forms import Form
 from app.models.reservations import Reservation
-from app.schemas.forms import FormCreateRequest
+from app.schemas.forms import FormCreateRequest, FormsGetResponse
 from app.utils.sec import encrypt_data, decrypt_data
 from app.services.xml_builder import getFormsData
 
@@ -25,10 +25,15 @@ def store_forms(
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
 
-    forms = db.query(Form).filter(Form.reservation_id == reservation.id).all()
-    if forms:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Formulários já foram submetidos para esta reserva")
+    if reservation.status == "Completed":
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="Este link de formulário já não está ativo."
+        )
 
+    db.query(Form).filter(Form.reservation_id == reservation.id).delete(
+        synchronize_session=False
+    )
     count = 0
     
     for guest in payload.guests:
@@ -63,4 +68,44 @@ def store_forms(
         raise
     print(getFormsData(db, reservation.id)) 
 
-    return {"message": "Formulários armazenados com sucesso", "count": {count}}
+    return {"message": "Formulários armazenados com sucesso", "count": count}
+
+
+
+@router.get(
+    "/get/{reservation_token}",
+    status_code=status.HTTP_200_OK,
+    response_model=FormsGetResponse,
+    summary="Get forms by reservation token"
+)
+def get_forms(reservation_token: str, db: Session = Depends(get_db)):
+    reservation = db.query(Reservation).filter(Reservation.access_token == reservation_token).first()
+
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
+
+    if reservation.status == "Completed":
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="Este link de formulário já não está ativo."
+        )
+
+    forms = db.query(Form).filter(Form.reservation_id == reservation.id).all()
+    if not forms:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Formulários não encontrados para esta reserva")
+
+    decrypted_forms = []
+    for form in forms:
+        decrypted_form = {
+            "full_name": decrypt_data(form.full_name),
+            "birth_date": decrypt_data(form.birth_date),
+            "nationality": decrypt_data(form.nationality),
+            "country_of_residence": decrypt_data(form.country_of_residence),
+            "city_of_residence": decrypt_data(form.city_of_residence),
+            "id_type": decrypt_data(form.id_type),
+            "id_number": decrypt_data(form.id_number),
+            "country_of_issue": decrypt_data(form.country_of_issue)
+        }
+        decrypted_forms.append(decrypted_form)
+
+    return {"guests": decrypted_forms}

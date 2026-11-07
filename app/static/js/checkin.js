@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const STORAGE_KEY = "siba_hospedes_draft";
-    let hospedes = (lerRascunho() || [criarHospede()])
-        .map(normalizarHospede);
+    let hospedes = [];
     let indiceAtual = 0;
 
     function criarHospede() {
@@ -19,12 +17,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function lerRascunho() {
         try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY));
+            return JSON.parse(localStorage.getItem(obterStorageKey()));
         } catch (error) {
             console.warn("Rascunho de check-in inválido; a iniciar um novo.", error);
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(obterStorageKey());
             return null;
         }
+    }
+
+    function obterTokenReserva() {
+        const pathSegments = window.location.pathname.split("/").filter(Boolean);
+        return pathSegments[pathSegments.length - 1];
+    }
+
+    function obterStorageKey() {
+        return `siba_hospedes_draft_${obterTokenReserva()}`;
+    }
+
+    function carregarHospedes() {
+        const rascunho = lerRascunho();
+        if (rascunho) {
+            return rascunho.map(normalizarHospede);
+        }
+
+        return [criarHospede()];
     }
 
     function normalizarHospede(hospede) {
@@ -79,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
             hospedes[indiceAtual].id_type = inputTipoDocumento.value;
             hospedes[indiceAtual].id_number = inputDoc.value;
             hospedes[indiceAtual].country_of_issue = inputPaisEmissao.value;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(hospedes));
+            localStorage.setItem(obterStorageKey(), JSON.stringify(hospedes));
         }
     }
 
@@ -119,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function removeGuest(guestList) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(guestList));
+        localStorage.setItem(obterStorageKey(), JSON.stringify(guestList));
     }
 
     inputNome.addEventListener("input", salvarAtual);
@@ -173,10 +189,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         await salvarAtual();
-        const pathSegments = window.location.pathname.split("/").filter(Boolean);
-        const token = pathSegments[pathSegments.length - 1];
+        const token = obterTokenReserva();
         try {
-            const response = await fetch("/forms/submit/" + token, {
+            const response = await fetch("/forms/submit/" + encodeURIComponent(token), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -188,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const errorBody = await response.text();
                 throw new Error(`Erro ao enviar os dados (${response.status}): ${errorBody}`);
             }
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(obterStorageKey());
             window.location.href = "/checkinSuccess/?token=" + encodeURIComponent(token);
         } catch (error) {
             console.error("Erro ao enviar os dados:", error);
@@ -196,5 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    hospedes = carregarHospedes();
     renderizar();
 });

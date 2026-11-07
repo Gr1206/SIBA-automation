@@ -28,3 +28,13 @@ class FormCreateRequest(BaseModel):
 
 class FormsCreateResponse(BaseModel):
     pass
+
+
+class FormsGetResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    guests: list[GuestItem] = Field(
+        ...,
+        min_length=1,
+        description="Lista de hóspedes com seus respectivos dados"
+    )

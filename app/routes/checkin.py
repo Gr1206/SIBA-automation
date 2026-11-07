@@ -8,7 +8,7 @@ from app.utils.sec import current_user
 
 router = APIRouter(prefix="/checkin", tags=["Check-in"])
 
-@router.get("/{token}/", response_class=HTMLResponse) #fica como /checkin/
+@router.get("/{token}", response_class=HTMLResponse) #fica como /checkin/
 async def checkin(request: Request, token: str, 
                   db: Session = Depends(get_db)):
 
@@ -17,6 +17,12 @@ async def checkin(request: Request, token: str,
 
     if not host_allowed:
         raise HTTPException(status_code=403, detail="Acesso negado.")
+
+    if host_allowed.status == "Completed":
+        raise HTTPException(
+            status_code=410,
+            detail="Este link de formulário já não está ativo."
+        )
 
     return templates.TemplateResponse(
         request=request,
