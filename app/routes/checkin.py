@@ -25,6 +25,7 @@ async def edit_checkin(request: Request, token: str,
             "titulo": "Editar Check-in",
             "reserva_id": reservation.id,
             "host_allowed": reservation,
+            "edit_mode": True,
         }
     )
 
@@ -51,5 +52,6 @@ async def checkin(request: Request, token: str,
             "titulo": "Boletim de Alojamento (SIBA)",
             "reserva_id": host_allowed.id,
             "host_allowed": host_allowed,
+            "edit_mode": False,
         }
     )

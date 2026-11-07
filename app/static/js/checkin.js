@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tabsContainer = document.getElementById("tabs-container");
     const formCheckin = document.getElementById("form-checkin");
+    const btnSendSiba = document.getElementById("btn-sendSiba");
     const inputNome = document.getElementById("campo-nome");
     const inputNascimento = document.getElementById("campo-nascimento");
     const inputNacionalidade = document.getElementById("campo-nacionalidade");
@@ -226,6 +227,10 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Erro ao enviar os dados:", error);
             alert("Ocorreu um erro ao enviar os dados. Por favor, tente novamente.");
         }
+    });
+
+    btnSendSiba.addEventListener("click", async () => {
+        console.log("Botão 'Enviar para o SIBA' clicado");
     });
 
     carregarHospedes()

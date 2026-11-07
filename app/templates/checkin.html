@@ -80,9 +80,20 @@
                 <p>Os dados recolhidos neste formulário destinam-se exclusivamente ao cumprimento da obrigação legal de comunicação de alojamento ao Sistema de Informação de Boletins de Alojamento (SIBA / AIMA), nos termos da Lei n.º 23/2007. O tratamento é realizado ao abrigo do Art.º 6.º, n.º 1, al. c) do RGPD (cumprimento de obrigação jurídica). Os dados serão conservados apenas pelo período legal estipulado. Para exercer os seus direitos de acesso, retificação ou apagamento, contacte [inserir email do alojamento].</p>
             </div>
 
+            {% if edit_mode %}
+            <div class="flex gap-3">
+                <button id="checkin" type="submit" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
+                    Guardar Alterações
+                </button>
+                <button id="btn-sendSiba" type="button" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
+                    Enviar para o SIBA
+                </button>
+            </div>
+            {% else %}
             <button id="checkin" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
                 Concluir Check-in
             </button>
+            {% endif %}
         </form>
     </div>
 
