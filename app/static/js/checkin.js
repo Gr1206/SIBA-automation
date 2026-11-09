@@ -1,6 +1,6 @@
 import { postJSON } from "./helpers/utils.js";
 document.addEventListener("DOMContentLoaded", () => {
-    let hospedes = [];
+    let hospedes = [criarHospede()];
     let indiceAtual = 0;
 
     function criarHospede() {
@@ -38,7 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function carregarHospedes() {
         const rascunho = lerRascunho();
         if (rascunho) {
-            return rascunho.map(normalizarHospede);
+            const hospedesGuardados = rascunho.map(normalizarHospede);
+            return hospedesGuardados.length > 0 ? hospedesGuardados : [criarHospede()];
         }
 
         const token = obterTokenReserva();
@@ -105,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    async function salvarAtual() {
+    function salvarAtual() {
         if (hospedes[indiceAtual]) {
             hospedes[indiceAtual].full_name = inputNome.value;
             hospedes[indiceAtual].birth_date = inputNascimento.value;
@@ -117,6 +118,33 @@ document.addEventListener("DOMContentLoaded", () => {
             hospedes[indiceAtual].country_of_issue = inputPaisEmissao.value;
             localStorage.setItem(obterStorageKey(), JSON.stringify(hospedes));
         }
+    }
+
+    function validarHospedes() {
+        const camposObrigatorios = [
+            ["full_name", "nome completo"],
+            ["birth_date", "data de nascimento"],
+            ["nationality", "nacionalidade"],
+            ["country_of_residence", "país de residência"],
+            ["city_of_residence", "cidade de residência"],
+            ["id_type", "tipo de documento"],
+            ["id_number", "número do documento"],
+            ["country_of_issue", "país emissor"],
+        ];
+
+        for (let index = 0; index < hospedes.length; index += 1) {
+            const hospede = hospedes[index];
+            const campoEmFalta = camposObrigatorios.find(([campo]) => !String(hospede[campo] || "").trim());
+
+            if (campoEmFalta) {
+                indiceAtual = index;
+                renderizar();
+                alert(`Preencha o campo "${campoEmFalta[1]}" do Hóspede ${index + 1}.`);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     function renderizar() {
@@ -167,15 +195,15 @@ document.addEventListener("DOMContentLoaded", () => {
     inputDoc.addEventListener("input", salvarAtual);
     inputPaisEmissao.addEventListener("change", salvarAtual);
 
-    btnRemove.addEventListener("click", async () => {
+    btnRemove.addEventListener("click", () => {
         if (hospedes.length > 1) {
+            salvarAtual();
             hospedes.splice(indiceAtual, 1);
             if (indiceAtual >= hospedes.length) {
                 indiceAtual = hospedes.length - 1;
             }
             removeGuest(hospedes);
             renderizar();
-            await salvarAtual();
         }
     });
 
@@ -203,12 +231,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     
-    returnBtn.addEventListener("click", () => {
-        window.location.href = "/dashboard";
-    });
+    if (returnBtn) {
+        returnBtn.addEventListener("click", () => {
+            window.location.href = "/dashboard";
+        });
+    }
 
     async function submitForm() {
-        await salvarAtual();
+        salvarAtual();
+        if (!validarHospedes()) {
+            throw new Error("Existem campos obrigatórios por preencher.");
+        }
+
         const token = obterTokenReserva();
 
         await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: hospedes });
@@ -219,8 +253,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     formCheckin.addEventListener("submit", async (e) => {
         e.preventDefault();
-        if (!formCheckin.checkValidity()) {
-            formCheckin.reportValidity();
+        salvarAtual();
+        if (!validarHospedes()) {
             return;
         }
         try {
@@ -246,6 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    renderizar();
 
     carregarHospedes()
         .then((hospedesCarregados) => {
