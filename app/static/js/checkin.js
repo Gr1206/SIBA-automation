@@ -1,3 +1,4 @@
+import { postJSON } from "./helpers/utils.js";
 document.addEventListener("DOMContentLoaded", () => {
     let hospedes = [];
     let indiceAtual = 0;
@@ -200,28 +201,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    async function submitForm() {
+        await salvarAtual();
+        const token = obterTokenReserva();
+
+        await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: hospedes });
+        localStorage.removeItem(obterStorageKey());
+        return token;
+    }
+
     formCheckin.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!formCheckin.checkValidity()) {
             formCheckin.reportValidity();
             return;
         }
-        await salvarAtual();
-        const token = obterTokenReserva();
         try {
-            const response = await fetch("/forms/submit/" + encodeURIComponent(token), {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ guests: hospedes })
-            });
-
-            if (!response.ok) {
-                const errorBody = await response.text();
-                throw new Error(`Erro ao enviar os dados (${response.status}): ${errorBody}`);
-            }
-            localStorage.removeItem(obterStorageKey());
+            const token = await submitForm();
             window.location.href = "/checkinSuccess/?token=" + encodeURIComponent(token);
         } catch (error) {
             console.error("Erro ao enviar os dados:", error);
@@ -229,9 +225,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    btnSendSiba.addEventListener("click", async () => {
-        console.log("Botão 'Enviar para o SIBA' clicado");
-    });
+    if (btnSendSiba) {
+        btnSendSiba.addEventListener("click", async () => {
+            console.log("Botão 'Enviar para o SIBA' clicado");
+            try {
+                const token = await submitForm();
+                await postJSON("/forms/get-xml/" + encodeURIComponent(token));
+                //submitSiba
+            } catch (error) {
+                console.error("Erro ao enviar os dados para o SIBA:", error);
+                alert("Ocorreu um erro ao enviar os dados para o SIBA. Por favor, tente novamente.");
+            }
+        });
+    }
 
     carregarHospedes()
         .then((hospedesCarregados) => {

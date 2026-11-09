@@ -126,7 +126,7 @@ def getPropertyData(db: Session, user_id: int) -> dict | None:
     }
 
 
-def getReservationData(db: Session, reservation_id: int, file_number: int | None = None) -> dict | None:
+def getReservationData(db: Session, reservation_id: int) -> dict | None:
     """
     Se file_number for None, pede o próximo sequencial com get_next_file_number.
     Para testes, passa um file_number fixo (ex.: 1) para não consumir o sequencial real.
@@ -135,8 +135,7 @@ def getReservationData(db: Session, reservation_id: int, file_number: int | None
     if not reservation:
         return None
 
-    if file_number is None:
-        file_number = get_next_file_number(db, reservation.user_id)
+    file_number = get_next_file_number(db, reservation.user_id)
 
     return {
         "file_number": file_number,
@@ -292,6 +291,27 @@ def save_xml(xml_string: str, directory: str | Path | None = None, filename: str
     return path
 
 
+
+def generate_siba_xml_for_reservation(db: Session, reservation_id: int) -> str:
+    """
+    Gera o XML SIBA para uma reserva específica.
+    Se file_number for None, pede o próximo sequencial com get_next_file_number.
+    Para testes, passa um file_number fixo (ex.: 1) para não consumir o sequencial real.
+    """
+    prop_data = getPropertyData(db, user_id=1)  # Substitua pelo user_id correto se necessário
+    res_data = getReservationData(db, reservation_id=reservation_id)
+    forms_data = getFormsData(db, reservation_id=reservation_id)
+
+    if not prop_data:
+        raise SibaValidationError("Propriedade não encontrada.")
+    if not res_data:
+        raise SibaValidationError("Reserva não encontrada.")
+    if not forms_data:
+        raise SibaValidationError("A reserva não tem hóspedes (formulários) associados.")
+
+    xml_final = generate_sibaXml(prop_data, res_data, forms_data)
+    print(f"\nXML guardado em: {save_xml(xml_final, filename='teste_siba2.xml')}")
+    return xml_final
 # ---------------------------------------------------------------------------
 # Teste local
 # ---------------------------------------------------------------------------
@@ -306,7 +326,7 @@ if __name__ == "__main__":
     try:
         prop_data = getPropertyData(db, user_id=USER_ID_TESTE)
         # file_number fixo para não consumir o sequencial real durante os testes
-        res_data = getReservationData(db, reservation_id=RESERVATION_ID_TESTE, file_number=1)
+        res_data = getReservationData(db, reservation_id=RESERVATION_ID_TESTE)
         forms_data = getFormsData(db, reservation_id=RESERVATION_ID_TESTE)
 
         if not prop_data:

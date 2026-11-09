@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.forms import Form
+from app.models.login import User
 from app.models.reservations import Reservation
 from app.schemas.forms import FormCreateRequest, FormsGetResponse
-from app.utils.sec import encrypt_data, decrypt_data
-from app.services.xml_builder import getFormsData
-
+from app.utils.sec import decrypt_sibaKey, encrypt_data, decrypt_data
+from app.services.xml_builder import generate_siba_xml_for_reservation, getFormsData, getPropertyData, getReservationData
+from app.services.siba_comm import enviar_boletins
 router = APIRouter(prefix="/forms", tags=["Forms"])
 
 @router.post(
@@ -97,3 +98,31 @@ def get_forms(reservation_token: str, db: Session = Depends(get_db)):
         decrypted_forms.append(decrypted_form)
 
     return {"guests": decrypted_forms}
+
+
+@router.post(
+    "/get-xml/{reservation_token}",
+    status_code=status.HTTP_200_OK,
+    summary="Get forms XML by reservation token"
+)
+def get_forms_xml(reservation_token: str, db: Session = Depends(get_db)):
+    reservation = db.query(Reservation).filter(Reservation.access_token == reservation_token).first()
+
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
+
+    forms = db.query(Form).filter(Form.reservation_id == reservation.id).all()
+    if not forms:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Formulários não encontrados para esta reserva")
+
+    property = db.query(User).filter(User.id == 1).first()
+    if not property:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Propriedade não encontrada")
+
+    xml_data = generate_siba_xml_for_reservation(db, reservation.id)
+    #para efeitos de teste para já 
+    # É SUPOSTO ISTO DAR UM TRIGGER PARA ENVIAR AGORA
+    prop_data = getPropertyData(db, user_id=reservation.user_id)
+    resp = enviar_boletins(xml_data, prop_data["nif"], prop_data["property_number"], decrypt_sibaKey(property.hashed_sibaKey), ambiente="dev")
+    print(resp)
+    return {"xml": xml_data}
