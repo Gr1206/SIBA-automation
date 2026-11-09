@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnRemove = document.getElementById("btn-remove-hospede");
     const btnAnterior = document.getElementById("btn-anterior");
     const btnSeguinte = document.getElementById("btn-seguinte");
+    const returnBtn = document.getElementById("btn-back");
 
     preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Selecione uma nacionalidade");
     preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
@@ -201,6 +202,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    
+    returnBtn.addEventListener("click", () => {
+        window.location.href = "/dashboard";
+    });
+
     async function submitForm() {
         await salvarAtual();
         const token = obterTokenReserva();
@@ -209,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem(obterStorageKey());
         return token;
     }
+
 
     formCheckin.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -238,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
 
     carregarHospedes()
         .then((hospedesCarregados) => {

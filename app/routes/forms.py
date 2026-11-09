@@ -124,5 +124,15 @@ def get_forms_xml(reservation_token: str, db: Session = Depends(get_db)):
     # É SUPOSTO ISTO DAR UM TRIGGER PARA ENVIAR AGORA
     prop_data = getPropertyData(db, user_id=reservation.user_id)
     resp = enviar_boletins(xml_data, prop_data["nif"], prop_data["property_number"], decrypt_sibaKey(property.hashed_sibaKey), ambiente="dev")
-    print(resp)
+    print(resp.http_status)
+
+    if resp.http_status == 200:
+        print("XML enviado com sucesso para o SIBA")
+        reservation.status = "Sent"
+        db.commit()
+    else:
+        print(f"Falha ao enviar XML para o SIBA. Status HTTP: {resp.http_status}")
+        reservation.status = "Error"
+        db.commit()
+
     return {"xml": xml_data}

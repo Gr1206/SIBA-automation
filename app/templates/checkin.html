@@ -7,9 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ url_for('static', path='js/countries.js') }}?v=1"></script>
     <script src="{{ url_for('static', path='js/nationalities.js') }}?v=1"></script>
-    <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=11"></script>
+    <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=12"></script>
 </head>
 <body class="bg-slate-100 min-h-screen p-4 flex items-center justify-center font-sans">
+
+    {% if edit_mode %}
+        <button id="btn-back" type="button" class="absolute top-4 left-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1 px-3 rounded-lg border border-slate-300 text-sm">
+            &larr; Voltar
+        </button>
+    {% endif %}
 
     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-2xl w-full">
         <div class="flex items-center justify-between mb-4 border-b pb-3">

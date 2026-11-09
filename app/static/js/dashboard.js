@@ -343,7 +343,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         t.innerHTML = "";
         reservations.forEach((reservation) => {
-            const isCompleted = String(reservation.status || "").trim().toLowerCase() === "completed";
+            const status = String(reservation.status || "").trim();
+            const normalizedStatus = status.toLowerCase();
+            const isCompleted = normalizedStatus === "completed";
+            const isEditable = isCompleted || normalizedStatus === "sent";
+            const statusBadgeStyle = normalizedStatus === "sent"
+                ? "background-color: #dcfce7; color: #15803d; border-color: #bbf7d0;"
+                : "";
             const row = document.createElement("tr");
             row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
             row.dataset.reservationId = reservation.id;
@@ -373,20 +379,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
                 <td class="py-3 px-4 text-center">${reservation.check_out || "-"}</td>
                 <td class="py-3 px-4 text-center">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                        ${reservation.status}
+                    <span
+                        class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200"
+                        style="${statusBadgeStyle}"
+                    >
+                        ${status}
                     </span>
                 </td>
                 <td class="py-3 px-4 text-center space-x-2">
  
                     <a
-                        href="${isCompleted
+                        href="${isEditable
                             ? `/checkin/edit/${reservation.access_token}`
                             : `/checkin/${reservation.access_token}`}"
-                        class="${isCompleted
+                        class="${isEditable
                             ? "text-emerald-600 hover:text-emerald-800"
                             : "text-slate-600 hover:text-blue-600"} font-medium"
-                    >${isCompleted ? "Editar" : "Link Forms"}</a>
+                    >${isEditable ? "Editar" : "Link Forms"}</a>
                     <button
                         type="button"
                         data-id="${reservation.id}"
