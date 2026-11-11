@@ -8,14 +8,15 @@ class Settings(BaseSettings):
 
     # Credenciais e endpoints do SIBA
     SIBA_ENV: str = "dev"  # "dev" ou "prod"
-    SIBA_WSDL_DEV: str = ""
-    SIBA_WSDL_PROD: str = ""
+    SIBA_WSDL_DEV: str = "https://siba.ssi.gov.pt/bawsdev/boletinsalojamento.asmx"
+    SIBA_WSDL_PROD: str = "https://siba.ssi.gov.pt/baws/boletinsalojamento.asmx"
 
     DATABASE_URL: str
 
     # Segurança
     SECRET_KEY: str
     SIBA_ENCRYPT_KEY: str
+    ENCRYPTION_KEY: str
 
     # Leitura automática do ficheiro .env na raiz do projeto
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")

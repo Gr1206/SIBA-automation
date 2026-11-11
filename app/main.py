@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routes import checkin, dashboard, reservations, profile, login, register, notifications, forms
+from app.routes import checkin, dashboard, reservations, profile, login, notifications, forms
 from app.core.templates import templates
 from app.db.session import engine, Base, ensure_user_profile_columns, SessionLocal
 from app.exceptions.expiredSession import SessionExpiredException
@@ -23,7 +23,7 @@ app.include_router(dashboard.router)
 app.include_router(reservations.router)
 app.include_router(profile.router)
 app.include_router(login.router)
-app.include_router(register.router)
+#app.include_router(register.router)
 app.include_router(notifications.router)
 app.include_router(forms.router)
 #app.include_router(submissionsSiba.router)
@@ -35,6 +35,10 @@ async def root(request: Request):
         name="landing.html", 
         context={"titulo": "Bem-vindo ao SIBA"}
     )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 @app.get("/checkinSuccess/", response_class=HTMLResponse)
 async def checkin_success(request: Request, token: str | None = None):
@@ -76,4 +80,4 @@ async def session_expired_exception_handler(request: Request, exc: SessionExpire
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)

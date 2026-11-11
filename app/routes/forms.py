@@ -9,6 +9,7 @@ from app.schemas.forms import FormCreateRequest, FormsGetResponse
 from app.utils.sec import decrypt_sibaKey, encrypt_data, decrypt_data
 from app.services.xml_builder import generate_siba_xml_for_reservation, getFormsData, getPropertyData, getReservationData
 from app.services.siba_comm import enviar_boletins
+from app.core.config import settings
 router = APIRouter(prefix="/forms", tags=["Forms"])
 
 @router.post(
@@ -123,7 +124,13 @@ def get_forms_xml(reservation_token: str, db: Session = Depends(get_db)):
     #para efeitos de teste para já 
     # É SUPOSTO ISTO DAR UM TRIGGER PARA ENVIAR AGORA
     prop_data = getPropertyData(db, user_id=reservation.user_id)
-    resp = enviar_boletins(xml_data, prop_data["nif"], prop_data["property_number"], decrypt_sibaKey(property.hashed_sibaKey), ambiente="dev")
+    resp = enviar_boletins(
+        xml_data,
+        prop_data["nif"],
+        prop_data["property_number"],
+        decrypt_sibaKey(property.hashed_sibaKey),
+        ambiente=settings.SIBA_ENV,
+    )
     print(resp.http_status)
 
     if resp.success:

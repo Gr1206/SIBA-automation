@@ -18,10 +18,12 @@ from xml.sax.saxutils import escape
 
 import requests
 
+from app.core.config import settings
+
 
 SIBA_URLS = {
-    "dev": "https://siba.ssi.gov.pt/bawsdev/boletinsalojamento.asmx",
-    "prod": "https://siba.ssi.gov.pt/baws/boletinsalojamento.asmx",
+    "dev": settings.SIBA_WSDL_DEV,
+    "prod": settings.SIBA_WSDL_PROD,
 }
 SOAP_ACTION = "http://sef.pt/EntregaBoletinsAlojamento"
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from app.core.config import settings
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.DATABASE_URL.replace("postgres://", "postgresql://", 1),
     connect_args=(
         {"check_same_thread": False}
         if "sqlite" in settings.DATABASE_URL

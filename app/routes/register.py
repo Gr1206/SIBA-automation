@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, Response, HTTPException, status
+""" from fastapi import APIRouter, Request, Depends, Response, HTTPException, status
 from fastapi.responses import HTMLResponse
 from app.core.templates import templates
 from app.models.login import User
@@ -52,4 +52,4 @@ def register_user(credentials: RegisterRequest, response: Response, request: Req
         path="/",
     )
 
-    return {"message": "User registered successfully", "user": {"id": new_user.id}}
+    return {"message": "User registered successfully", "user": {"id": new_user.id}} """

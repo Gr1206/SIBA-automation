@@ -1,31 +1,15 @@
-from fastapi import HTTPException
 from fastapi.params import Cookie
 from app.exceptions.expiredSession import SessionExpiredException
 from pwdlib import PasswordHash
 from itsdangerous import BadSignature, URLSafeSerializer
-import os 
-from dotenv import load_dotenv
 from cryptography.fernet import Fernet
+from app.core.config import settings
 
-load_dotenv()  
+signer = URLSafeSerializer(settings.SECRET_KEY)
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY is not set in the environment variables.")
+fernet = Fernet(settings.SIBA_ENCRYPT_KEY.encode())
 
-SIBA_ENCRYPT_KEY = os.getenv("SIBA_ENCRYPT_KEY")
-if not SIBA_ENCRYPT_KEY:
-    raise ValueError("SIBA_ENCRYPT_KEY is not set in the environment variables.")
-
-ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
-if not ENCRYPTION_KEY:
-    raise ValueError("ENCRYPTION_KEY is not set in the environment variables.")
-
-signer = URLSafeSerializer(SECRET_KEY)
-
-fernet = Fernet(SIBA_ENCRYPT_KEY.encode() if isinstance(SIBA_ENCRYPT_KEY, str) else SIBA_ENCRYPT_KEY)
-
-fernet_encryptor = Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
+fernet_encryptor = Fernet(settings.ENCRYPTION_KEY.encode())
 
 password_hasher = PasswordHash.recommended()
 
