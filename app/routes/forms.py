@@ -126,13 +126,24 @@ def get_forms_xml(reservation_token: str, db: Session = Depends(get_db)):
     resp = enviar_boletins(xml_data, prop_data["nif"], prop_data["property_number"], decrypt_sibaKey(property.hashed_sibaKey), ambiente="dev")
     print(resp.http_status)
 
-    if resp.http_status == 200:
+    if resp.success:
         print("XML enviado com sucesso para o SIBA")
         reservation.status = "Sent"
         db.commit()
     else:
-        print(f"Falha ao enviar XML para o SIBA. Status HTTP: {resp.http_status}")
+        print(
+            f"Falha ao enviar XML para o SIBA. "
+            f"Status HTTP: {resp.http_status}; "
+            f"Código(s): {resp.code}"
+        )
+        if resp.description:
+            print(f"Descrição(ões) do SIBA:\n{resp.description}")
         reservation.status = "Error"
         db.commit()
 
-    return {"xml": xml_data}
+    return {
+        "success": resp.success,
+        "status": reservation.status,
+        "code": resp.code,
+        "description": resp.description,
+    }

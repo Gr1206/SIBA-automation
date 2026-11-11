@@ -92,15 +92,30 @@ def parse_response(body: str, http_status: int) -> SibaResponse:
     if result == "0":
         return SibaResponse(True, "0", "", body, http_status)
 
-    # Erro: o resultado é um XML com <Codigo_Retorno> e <Descricao>
-    code, description = result, ""
+    # Erro: o resultado é um XML com um ou mais <RetornoBA>
+    codes = []
+    descriptions = []
     try:
         inner = ET.fromstring(result)
-        code = _find_text(inner, "Codigo_Retorno") or result
-        description = _find_text(inner, "Descricao") or ""
+        for retorno in inner.iter():
+            if _local(retorno.tag) != "RetornoBA":
+                continue
+            code = _find_text(retorno, "Codigo_Retorno")
+            description = _find_text(retorno, "Descricao")
+            if code:
+                codes.append(code)
+            if description:
+                descriptions.append(description)
     except ET.ParseError:
-        pass  # mantém o texto bruto como código
-    return SibaResponse(False, code, description, body, http_status)
+        pass
+
+    return SibaResponse(
+        False,
+        ", ".join(codes) or result,
+        "\n".join(descriptions),
+        body,
+        http_status,
+    )
 
 
 def enviar_boletins(

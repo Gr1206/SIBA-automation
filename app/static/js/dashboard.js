@@ -346,10 +346,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const status = String(reservation.status || "").trim();
             const normalizedStatus = status.toLowerCase();
             const isCompleted = normalizedStatus === "completed";
-            const isEditable = isCompleted || normalizedStatus === "sent";
+            const isError = normalizedStatus === "error";
+            const isEditable = isCompleted || normalizedStatus === "sent" || isError;
             const statusBadgeStyle = normalizedStatus === "sent"
                 ? "background-color: #dcfce7; color: #15803d; border-color: #bbf7d0;"
-                : "";
+                : "background-color: #f31111; color: #060606; border-color: #fde68a;";
             const row = document.createElement("tr");
             row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
             row.dataset.reservationId = reservation.id;

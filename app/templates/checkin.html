@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ url_for('static', path='js/countries.js') }}?v=1"></script>
     <script src="{{ url_for('static', path='js/nationalities.js') }}?v=1"></script>
-    <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=13"></script>
+    <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=14"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 flex items-center justify-center font-sans">
+<body class="bg-slate-100 min-h-screen p-3 flex items-center justify-center font-sans">
 
     {% if edit_mode %}
         <button id="btn-back" type="button" class="absolute top-4 left-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1 px-3 rounded-lg border border-slate-300 text-sm">
@@ -17,8 +17,8 @@
         </button>
     {% endif %}
 
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-2xl w-full">
-        <div class="flex items-center justify-between mb-4 border-b pb-3">
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 max-w-2xl w-full">
+        <div class="flex items-center justify-between mb-3 border-b pb-2">
             <div>
                 <h1 class="text-xl font-bold text-slate-800">Boletim de Alojamento (SIBA)</h1>
                 <p class="text-xs text-slate-500">Reserva: <span class="font-mono font-semibold text-blue-600">{{ reserva_id }}</span></p>
@@ -28,32 +28,32 @@
                 <button id="btn-remove-hospede" type="button" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-3 py-1.5 rounded-lg border border-red-300">- Remover Hóspede</button>
             </div>
         </div>
-        <div id="tabs-container" class="flex gap-2 mb-4 overflow-x-auto pb-1"></div>
-        <form id="form-checkin" class="space-y-4">
-            <div class="grid gap-4 sm:grid-cols-2">
+        <div id="tabs-container" class="flex gap-2 mb-3 overflow-x-auto pb-1"></div>
+        <form id="form-checkin" class="space-y-3">
+            <div class="grid gap-3 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                     <label for="campo-nome" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome Completo</label>
-                    <input type="text" id="campo-nome" name="full_name" autocomplete="name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="campo-nome" name="full_name" autocomplete="name" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label for="campo-nascimento" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Data de Nascimento</label>
-                    <input type="date" id="campo-nascimento" name="birth_date" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="date" id="campo-nascimento" name="birth_date" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label for="campo-nacionalidade" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nacionalidade</label>
-                    <select id="campo-nacionalidade" name="nationality" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    <select id="campo-nacionalidade" name="nationality" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
                 <div>
                     <label for="campo-pais-residencia" class="block text-xs font-semibold uppercase text-slate-600 mb-1">País de Residência Habitual</label>
-                    <select id="campo-pais-residencia" name="country_of_residence" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    <select id="campo-pais-residencia" name="country_of_residence" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
                 <div>
                     <label for="campo-cidade-residencia" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cidade/Localidade de Residência</label>
-                    <input type="text" id="campo-cidade-residencia" name="city_of_residence" autocomplete="address-level2" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="campo-cidade-residencia" name="city_of_residence" autocomplete="address-level2" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label for="campo-tipo-doc" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tipo de Documento</label>
-                    <select id="campo-tipo-doc" name="id_type" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <select id="campo-tipo-doc" name="id_type" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">Selecione uma opção</option>
                         <option value="P">Passaporte</option>
                         <option value="B">Cartão de Cidadão / BI UE</option>
@@ -62,16 +62,16 @@
                 </div>
                 <div>
                     <label for="campo-doc" class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número do Documento</label>
-                    <input type="text" id="campo-doc" name="id_number" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="campo-doc" name="id_number" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label for="campo-pais-emissao" class="block text-xs font-semibold uppercase text-slate-600 mb-1">País Emissor do Documento</label>
-                    <select id="campo-pais-emissao" name="country_of_issue" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    <select id="campo-pais-emissao" name="country_of_issue" required class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
             </div>
 
         <!-- Navegação Anterior / Seguinte -->
-        <div class="flex gap-3 pt-2">
+        <div class="flex gap-3 pt-1">
             <button id="btn-anterior" type="button" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2 rounded-lg">
                 &larr; Anterior
             </button>
@@ -81,22 +81,34 @@
         </div>
 
 
-            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-xs leading-6 text-slate-700">
+            <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-slate-700">
                 <p class="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">Nota de privacidade e base legal</p>
                 <p>Os dados recolhidos neste formulário destinam-se exclusivamente ao cumprimento da obrigação legal de comunicação de alojamento ao Sistema de Informação de Boletins de Alojamento (SIBA / AIMA), nos termos da Lei n.º 23/2007. O tratamento é realizado ao abrigo do Art.º 6.º, n.º 1, al. c) do RGPD (cumprimento de obrigação jurídica). Os dados serão conservados apenas pelo período legal estipulado. Para exercer os seus direitos de acesso, retificação ou apagamento, contacte [inserir email do alojamento].</p>
             </div>
 
             {% if edit_mode %}
             <div class="flex gap-3">
-                <button id="checkin" type="submit" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
+                <button id="checkin" type="submit" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">
                     Guardar Alterações
                 </button>
-                <button id="btn-sendSiba" type="button" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
+                <button id="btn-sendSiba" type="button" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">
                     Enviar para o SIBA
                 </button>
             </div>
+            <div id="siba-status-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 px-4" role="dialog" aria-modal="true" aria-labelledby="siba-status-title">
+                <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                    <h2 id="siba-status-title" class="text-lg font-bold text-slate-800">Envio para o SIBA</h2>
+                    <p id="siba-status-message" class="mt-2 text-sm text-slate-600">Aguarde enquanto o envio é processado.</p>
+                    <p id="siba-status-details" class="mt-2 hidden whitespace-pre-line text-sm text-red-700"></p>
+                    <div class="mt-5 flex justify-end">
+                        <button id="siba-status-close" type="button" class="hidden rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
             {% else %}
-            <button id="checkin" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
+            <button id="checkin" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">
                 Concluir Check-in
             </button>
             {% endif %}

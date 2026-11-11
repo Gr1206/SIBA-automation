@@ -91,6 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnAnterior = document.getElementById("btn-anterior");
     const btnSeguinte = document.getElementById("btn-seguinte");
     const returnBtn = document.getElementById("btn-back");
+    const sibaStatusModal = document.getElementById("siba-status-modal");
+    const sibaStatusTitle = document.getElementById("siba-status-title");
+    const sibaStatusMessage = document.getElementById("siba-status-message");
+    const sibaStatusDetails = document.getElementById("siba-status-details");
+    const sibaStatusClose = document.getElementById("siba-status-close");
 
     preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Selecione uma nacionalidade");
     preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
@@ -250,6 +255,31 @@ document.addEventListener("DOMContentLoaded", () => {
         return token;
     }
 
+    function atualizarEstadoSiba({ title, message, details = "", concluido = false, sucesso = false }) {
+        sibaStatusTitle.textContent = title;
+        sibaStatusMessage.textContent = message;
+        sibaStatusDetails.textContent = details;
+        sibaStatusDetails.classList.toggle("hidden", !details);
+        sibaStatusTitle.className = `text-lg font-bold ${
+            sucesso ? "text-emerald-700" : concluido ? "text-red-700" : "text-slate-800"
+        }`;
+        sibaStatusClose.classList.toggle("hidden", !concluido);
+    }
+
+    function abrirEstadoSiba() {
+        sibaStatusModal.classList.remove("hidden");
+        sibaStatusModal.classList.add("flex");
+        atualizarEstadoSiba({
+            title: "A aguardar o SIBA",
+            message: "O envio está a ser processado. Aguarde, por favor."
+        });
+    }
+
+    function fecharEstadoSiba() {
+        sibaStatusModal.classList.add("hidden");
+        sibaStatusModal.classList.remove("flex");
+    }
+
 
     formCheckin.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -269,15 +299,55 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnSendSiba) {
         btnSendSiba.addEventListener("click", async () => {
             console.log("Botão 'Enviar para o SIBA' clicado");
+            salvarAtual();
+            if (!validarHospedes()) {
+                return;
+            }
+
+            abrirEstadoSiba();
+            btnSendSiba.disabled = true;
+            btnSendSiba.classList.add("opacity-50", "cursor-not-allowed");
             try {
                 const token = await submitForm();
-                await postJSON("/forms/get-xml/" + encodeURIComponent(token));
-                //submitSiba
+                const response = await postJSON("/forms/get-xml/" + encodeURIComponent(token));
+                const resultado = await response.json();
+
+                if (!resultado.success) {
+                    atualizarEstadoSiba({
+                        title: "Envio concluído com erro",
+                        message: "O SIBA rejeitou os dados enviados.",
+                        details: [
+                            resultado.code ? `Código(s): ${resultado.code}` : "",
+                            resultado.description || ""
+                        ].filter(Boolean).join("\n"),
+                        concluido: true
+                    });
+                    return;
+                }
+
+                atualizarEstadoSiba({
+                    title: "Envio concluído",
+                    message: "Os dados foram enviados com sucesso para o SIBA.",
+                    concluido: true,
+                    sucesso: true
+                });
             } catch (error) {
                 console.error("Erro ao enviar os dados para o SIBA:", error);
-                alert("Ocorreu um erro ao enviar os dados para o SIBA. Por favor, tente novamente.");
+                atualizarEstadoSiba({
+                    title: "Envio concluído com erro",
+                    message: "Não foi possível concluir o envio para o SIBA.",
+                    details: error.message || "Ocorreu um erro inesperado.",
+                    concluido: true
+                });
+            } finally {
+                btnSendSiba.disabled = false;
+                btnSendSiba.classList.remove("opacity-50", "cursor-not-allowed");
             }
         });
+    }
+
+    if (sibaStatusClose) {
+        sibaStatusClose.addEventListener("click", fecharEstadoSiba);
     }
 
     renderizar();
