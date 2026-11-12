@@ -298,16 +298,21 @@ def generate_siba_xml_for_reservation(db: Session, reservation_id: int) -> str:
     Se file_number for None, pede o próximo sequencial com get_next_file_number.
     Para testes, passa um file_number fixo (ex.: 1) para não consumir o sequencial real.
     """
-    prop_data = getPropertyData(db, user_id=1)  # Substitua pelo user_id correto se necessário
+    reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if not reservation:
+        raise SibaValidationError("Reserva não encontrada.")
+
     res_data = getReservationData(db, reservation_id=reservation_id)
     forms_data = getFormsData(db, reservation_id=reservation_id)
 
-    if not prop_data:
-        raise SibaValidationError("Propriedade não encontrada.")
     if not res_data:
         raise SibaValidationError("Reserva não encontrada.")
     if not forms_data:
         raise SibaValidationError("A reserva não tem hóspedes (formulários) associados.")
+
+    prop_data = getPropertyData(db, user_id=reservation.user_id)
+    if not prop_data:
+        raise SibaValidationError("Propriedade não encontrada.")
 
     xml_final = generate_sibaXml(prop_data, res_data, forms_data)
     print(f"\nXML guardado em: {save_xml(xml_final, filename='teste_siba2.xml')}")

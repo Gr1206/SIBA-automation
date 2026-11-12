@@ -6,7 +6,7 @@ from app.models.forms import Form
 from app.models.login import User
 from app.models.reservations import Reservation
 from app.schemas.forms import FormCreateRequest, FormsGetResponse
-from app.utils.sec import decrypt_sibaKey, encrypt_data, decrypt_data
+from app.utils.sec import current_user, decrypt_sibaKey, encrypt_data, decrypt_data
 from app.services.xml_builder import generate_siba_xml_for_reservation, getFormsData, getPropertyData, getReservationData
 from app.services.siba_comm import enviar_boletins
 from app.core.config import settings
@@ -106,8 +106,15 @@ def get_forms(reservation_token: str, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     summary="Get forms XML by reservation token"
 )
-def get_forms_xml(reservation_token: str, db: Session = Depends(get_db)):
-    reservation = db.query(Reservation).filter(Reservation.access_token == reservation_token).first()
+def get_forms_xml(
+    reservation_token: str,
+    user_id: int = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    reservation = db.query(Reservation).filter(
+        Reservation.access_token == reservation_token,
+        Reservation.user_id == user_id,
+    ).first()
 
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reserva não encontrada")
@@ -116,7 +123,7 @@ def get_forms_xml(reservation_token: str, db: Session = Depends(get_db)):
     if not forms:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Formulários não encontrados para esta reserva")
 
-    property = db.query(User).filter(User.id == 1).first()
+    property = db.query(User).filter(User.id == reservation.user_id).first()
     if not property:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Propriedade não encontrada")
 

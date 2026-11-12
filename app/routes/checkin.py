@@ -10,9 +10,11 @@ router = APIRouter(prefix="/checkin", tags=["Check-in"])
 
 @router.get("/edit/{token}", response_class=HTMLResponse)
 async def edit_checkin(request: Request, token: str,
+                       user_id: int = Depends(current_user),
                        db: Session = Depends(get_db)):
     reservation = db.query(Reservation).filter(
-        Reservation.access_token == token
+        Reservation.access_token == token,
+        Reservation.user_id == user_id,
     ).first()
 
     if not reservation:
