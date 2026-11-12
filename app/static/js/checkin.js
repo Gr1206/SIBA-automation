@@ -97,9 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const sibaStatusDetails = document.getElementById("siba-status-details");
     const sibaStatusClose = document.getElementById("siba-status-close");
 
-    preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Selecione uma nacionalidade");
-    preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
-    preencherSelect(inputPaisEmissao, window.SIBA_COUNTRIES, "Selecione um país");
+    preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Select a nationality");
+    preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Select a country");
+    preencherSelect(inputPaisEmissao, window.SIBA_COUNTRIES, "Select a country");
 
     function preencherSelect(select, options, placeholder) {
         select.innerHTML = `<option value="">${placeholder}</option>`;
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (campoEmFalta) {
                 indiceAtual = index;
                 renderizar();
-                alert(`Preencha o campo "${campoEmFalta[1]}" do Hóspede ${index + 1}.`);
+                alert(`Please fill in the field "${campoEmFalta[1]}" of Guest ${index + 1}.`);
                 return false;
             }
         }
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hospedes.forEach((_, idx) => {
             const tab = document.createElement("button");
             tab.type = "button";
-            tab.textContent = `Hóspede ${idx + 1}`;
+            tab.textContent = `Guest ${idx + 1}`;
             tab.className = `text-xs px-3 py-1 rounded-full font-medium transition-colors ${
                 idx === indiceAtual
                     ? "bg-blue-600 text-white"

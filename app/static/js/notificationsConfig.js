@@ -27,6 +27,20 @@ export const NOTIFICATION_TEMPLATES = {
     actionUrl: "/profile",
     actionText: "Atualizar Informações"
   },
+  PENDING_RESERVATIONS: {
+    title: "Reservas Pendentes",
+    description: "Existem reservas que ainda não foram enviadas para o SIBA.",
+    severity: "warning",
+    actionUrl: "/dashboard",
+    actionText: "Ver Reservas"
+  },
+  ERROR_RESERVATIONS: {
+    title: "Erros nas Reservas",
+    description: "Algumas reservas apresentaram erros durante o envio para o SIBA.",
+    severity: "importante",
+    actionUrl: "/dashboard",
+    actionText: "Corrigir Erro De Formulário"
+  },
   // Template de fallback se aparecer um código desconhecido
   DEFAULT: {
     title: "Aviso do Sistema",

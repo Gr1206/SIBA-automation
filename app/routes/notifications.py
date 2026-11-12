@@ -16,6 +16,6 @@ async def notifications(request: Request,
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return HTMLResponse(content="Usuário não encontrado", status_code=404)
-    notifications = get_user_notifications(user)
+    notifications = get_user_notifications(user, db)
     print("notifications", notifications)
     return NotificationResponse(notifications=notifications)

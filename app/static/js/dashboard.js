@@ -1,4 +1,4 @@
-import { NOTIFICATION_TEMPLATES, SEVERITY_STYLES } from './notificationsConfig.js';
+import { NOTIFICATION_TEMPLATES, SEVERITY_STYLES } from './notificationsConfig.js?v=3';
 
 document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("newReservation");
@@ -45,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderNotificationItem(notification) {
-        const template = NOTIFICATION_TEMPLATES[notification.code] || NOTIFICATION_TEMPLATES.DEFAULT;
+        const code = String(notification?.code || "").trim().toUpperCase();
+        const template = NOTIFICATION_TEMPLATES[code] || NOTIFICATION_TEMPLATES.DEFAULT;
         const styles = SEVERITY_STYLES[template.severity] || SEVERITY_STYLES.info;
 
         return `

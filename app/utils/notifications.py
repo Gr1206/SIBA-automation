@@ -1,7 +1,16 @@
-from app.models.login import User
+from sqlalchemy.orm import Session
 
-def get_user_notifications(user: User) -> list[dict]:
+from app.models.login import User
+from app.models.reservations import Reservation
+from app.utils.helpers import count_pendingReservations, count_errorReservations
+
+def get_user_notifications(user: User, db: Session) -> list[dict]:
     alerts = []
+
+    pending = count_pendingReservations(db, user.id)
+    error = count_errorReservations(db, user.id)
+    print("pending", pending)
+    print("error", error)
 
     if not user.nif:
         alerts.append({
@@ -23,5 +32,15 @@ def get_user_notifications(user: User) -> list[dict]:
             or not user.postal_zone or not user.telephone or not user.contact_name:
         alerts.append({
             "code": "MISSING_PROPERTY_INFO"
+        })
+
+    if pending > 0:
+        alerts.append({
+            "code": "PENDING_RESERVATIONS",
+        })
+
+    if error > 0:
+        alerts.append({
+            "code": "ERROR_RESERVATIONS",
         })
     return alerts
