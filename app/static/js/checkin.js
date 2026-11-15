@@ -76,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const tabsContainer = document.getElementById("tabs-container");
-    const formCheckin = document.getElementById("form-checkin");
     const btnSendSiba = document.getElementById("btn-sendSiba");
     const inputNome = document.getElementById("campo-nome");
     const inputNascimento = document.getElementById("campo-nascimento");
@@ -242,19 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    async function submitForm() {
-        salvarAtual();
-        if (!validarHospedes()) {
-            throw new Error("Existem campos obrigatórios por preencher.");
-        }
-
-        const token = obterTokenReserva();
-
-        await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: hospedes });
-        localStorage.removeItem(obterStorageKey());
-        return token;
-    }
-
     function atualizarEstadoSiba({ title, message, details = "", concluido = false, sucesso = false }) {
         sibaStatusTitle.textContent = title;
         sibaStatusMessage.textContent = message;
@@ -281,20 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    formCheckin.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        salvarAtual();
-        if (!validarHospedes()) {
-            return;
-        }
-        try {
-            const token = await submitForm();
-            window.location.href = "/checkinSuccess/?token=" + encodeURIComponent(token);
-        } catch (error) {
-            console.error("Erro ao enviar os dados:", error);
-            alert("Ocorreu um erro ao enviar os dados. Por favor, tente novamente.");
-        }
-    });
 
     if (btnSendSiba) {
         btnSendSiba.addEventListener("click", async () => {

@@ -31,29 +31,3 @@ async def edit_checkin(request: Request, token: str,
         }
     )
 
-@router.get("/{token}", response_class=HTMLResponse) #fica como /checkin/
-async def checkin(request: Request, token: str, 
-                  db: Session = Depends(get_db)):
-
-    host_allowed = db.query(Reservation).filter(Reservation.access_token == token).first()
-    print("host_allowed", host_allowed)
-
-    if not host_allowed:
-        raise HTTPException(status_code=403, detail="Acesso negado.")
-
-    if host_allowed.status == "Completed":
-        raise HTTPException(
-            status_code=410,
-            detail="Este link de formulário já não está ativo."
-        )
-
-    return templates.TemplateResponse(
-        request=request,
-        name="checkin.html",
-        context={
-            "titulo": "Boletim de Alojamento (SIBA)",
-            "reserva_id": host_allowed.id,
-            "host_allowed": host_allowed,
-            "edit_mode": False,
-        }
-    )

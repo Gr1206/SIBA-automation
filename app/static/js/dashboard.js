@@ -346,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reservations.forEach((reservation) => {
             const status = String(reservation.status || "").trim();
             const normalizedStatus = status.toLowerCase();
-            const isCompleted = normalizedStatus === "completed";
+            const isCompleted = (normalizedStatus === "completed" ) || ( normalizedStatus === "pending" );
             const isError = normalizedStatus === "error";
             const isEditable = isCompleted || normalizedStatus === "sent" || isError;
             const statusBadgeStyle = normalizedStatus === "sent"
@@ -393,11 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <a
                         href="${isEditable
                             ? `/checkin/edit/${reservation.access_token}`
-                            : `/checkin/${reservation.access_token}`}"
+                            : `/dashboard`}"
                         class="${isEditable
                             ? "text-emerald-600 hover:text-emerald-800"
                             : "text-slate-600 hover:text-blue-600"} font-medium"
-                    >${isEditable ? "Editar" : "Link Forms"}</a>
+                    >${isEditable ? "Link Forms" : "Enviado"}</a>
                     <button
                         type="button"
                         data-id="${reservation.id}"
