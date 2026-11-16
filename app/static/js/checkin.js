@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    function lerRascunho() {
+/*     function lerRascunho() {
         try {
             return JSON.parse(localStorage.getItem(obterStorageKey()));
         } catch (error) {
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem(obterStorageKey());
             return null;
         }
-    }
+    } */
 
     function obterTokenReserva() {
         const pathSegments = window.location.pathname.split("/").filter(Boolean);
@@ -96,9 +96,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const sibaStatusDetails = document.getElementById("siba-status-details");
     const sibaStatusClose = document.getElementById("siba-status-close");
 
-    preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Select a nationality");
-    preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Select a country");
-    preencherSelect(inputPaisEmissao, window.SIBA_COUNTRIES, "Select a country");
+    preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Selecione uma nacionalidade");
+    preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
+    preencherSelect(inputPaisEmissao, window.SIBA_COUNTRIES, "Selecione um país");
+
+    async function submitForm() {
+        salvarAtual();
+        if (!validarHospedes()) {
+            throw new Error("Existem campos obrigatórios por preencher.");
+        }
+
+        const token = obterTokenReserva();
+
+        await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: hospedes });
+        //localStorage.removeItem(obterStorageKey());
+        return token;
+    }
 
     function preencherSelect(select, options, placeholder) {
         select.innerHTML = `<option value="">${placeholder}</option>`;
@@ -110,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function salvarAtual() {
+/*     function salvarAtual() {
         if (hospedes[indiceAtual]) {
             hospedes[indiceAtual].full_name = inputNome.value;
             hospedes[indiceAtual].birth_date = inputNascimento.value;
@@ -122,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
             hospedes[indiceAtual].country_of_issue = inputPaisEmissao.value;
             localStorage.setItem(obterStorageKey(), JSON.stringify(hospedes));
         }
-    }
+    } */
 
     function validarHospedes() {
         const camposObrigatorios = [
@@ -143,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (campoEmFalta) {
                 indiceAtual = index;
                 renderizar();
-                alert(`Please fill in the field "${campoEmFalta[1]}" of Guest ${index + 1}.`);
+                alert(`Preencha o campo "${campoEmFalta[1]}" do Hóspede ${index + 1}.`);
                 return false;
             }
         }
@@ -171,14 +184,14 @@ document.addEventListener("DOMContentLoaded", () => {
         hospedes.forEach((_, idx) => {
             const tab = document.createElement("button");
             tab.type = "button";
-            tab.textContent = `Guest ${idx + 1}`;
+            tab.textContent = `Hóspede ${idx + 1}`;
             tab.className = `text-xs px-3 py-1 rounded-full font-medium transition-colors ${
                 idx === indiceAtual
                     ? "bg-blue-600 text-white"
                     : "bg-slate-200 text-slate-700 hover:bg-slate-300"
             }`;
             tab.addEventListener("click", () => {
-                salvarAtual();
+                //salvarAtual();
                 indiceAtual = idx;
                 renderizar();
             });
@@ -186,22 +199,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function removeGuest(guestList) {
+ /*    function removeGuest(guestList) {
         localStorage.setItem(obterStorageKey(), JSON.stringify(guestList));
-    }
+    } */
 
-    inputNome.addEventListener("input", salvarAtual);
+/*     inputNome.addEventListener("input", salvarAtual);
     inputNascimento.addEventListener("input", salvarAtual);
     inputNacionalidade.addEventListener("change", salvarAtual);
     inputPaisResidencia.addEventListener("change", salvarAtual);
     inputCidadeResidencia.addEventListener("input", salvarAtual);
     inputTipoDocumento.addEventListener("change", salvarAtual);
     inputDoc.addEventListener("input", salvarAtual);
-    inputPaisEmissao.addEventListener("change", salvarAtual);
+    inputPaisEmissao.addEventListener("change", salvarAtual); */
 
     btnRemove.addEventListener("click", () => {
         if (hospedes.length > 1) {
-            salvarAtual();
+            //salvarAtual();
             hospedes.splice(indiceAtual, 1);
             if (indiceAtual >= hospedes.length) {
                 indiceAtual = hospedes.length - 1;
@@ -212,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     btnAdd.addEventListener("click", () => {
-        salvarAtual();
+        //salvarAtual();
         hospedes.push(criarHospede());
         indiceAtual = hospedes.length - 1;
         renderizar();
@@ -220,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnAnterior.addEventListener("click", () => {
         if (indiceAtual > 0) {
-            salvarAtual();
+            //salvarAtual();
             indiceAtual--;
             renderizar();
         }
@@ -228,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnSeguinte.addEventListener("click", () => {
         if (indiceAtual < hospedes.length - 1) {
-            salvarAtual();
+            ////salvarAtual();
             indiceAtual++;
             renderizar();
         }

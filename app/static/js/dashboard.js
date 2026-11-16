@@ -349,9 +349,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const isCompleted = (normalizedStatus === "completed" ) || ( normalizedStatus === "pending" );
             const isError = normalizedStatus === "error";
             const isEditable = isCompleted || normalizedStatus === "sent" || isError;
-            const statusBadgeStyle = normalizedStatus === "sent"
-                ? "background-color: #dcfce7; color: #15803d; border-color: #bbf7d0;"
-                : "background-color: #f31111; color: #060606; border-color: #fde68a;";
+            const badgeStyles = {
+                sent :"background-color: #dcfce7; color: #15803d; border-color: #bbf7d0;" ,
+                pending :"background-color: #fef3c7; color: #92400e; border-color: #fde68a;" ,
+                completed :"background-color: #d1fae5; color: #047857; border-color: #bbf7d0;" ,
+                error :"background-color: #fee2e2; color: #b91c1c; border-color: #fecaca;" 
+            }
+           const statusBadgeStyle = badgeStyles[normalizedStatus] 
+            || "background-color: #f3f4f6; color: #374151; border-color: #e5e7eb;"; 
             const row = document.createElement("tr");
             row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
             row.dataset.reservationId = reservation.id;
