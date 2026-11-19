@@ -2,6 +2,10 @@ import { postJSON } from "./helpers/utils.js";
 document.addEventListener("DOMContentLoaded", () => {
     let hospedes = [criarHospede()];
     let indiceAtual = 0;
+    let gravacaoPendente = Promise.resolve();
+    let ultimaListaGuardada;
+    let temporizadorGravacao;
+    let houveEdicao = false;
 
     function criarHospede() {
         return {
@@ -16,32 +20,35 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-/*     function lerRascunho() {
-        try {
-            return JSON.parse(localStorage.getItem(obterStorageKey()));
-        } catch (error) {
-            console.warn("Rascunho de check-in inválido; a iniciar um novo.", error);
-            localStorage.removeItem(obterStorageKey());
-            return null;
-        }
-    } */
-
     function obterTokenReserva() {
         const pathSegments = window.location.pathname.split("/").filter(Boolean);
         return pathSegments[pathSegments.length - 1];
     }
 
-    function obterStorageKey() {
-        return `siba_hospedes_draft_${obterTokenReserva()}`;
+    const chaveRascunho = `siba_hospedes_draft_${obterTokenReserva()}`;
+
+    function lerRascunho() {
+        try {
+            const lista = JSON.parse(localStorage.getItem(chaveRascunho));
+            if (Array.isArray(lista) && lista.length > 0) {
+                return lista.map(normalizarHospede);
+            }
+        } catch (error) {
+            console.warn("Não foi possível carregar o rascunho de check-in.", error);
+        }
+        return null;
+    }
+
+    function guardarRascunho() {
+        houveEdicao = true;
+        try {
+            localStorage.setItem(chaveRascunho, JSON.stringify(hospedes));
+        } catch (error) {
+            console.warn("Não foi possível guardar o rascunho de check-in.", error);
+        }
     }
 
     async function carregarHospedes() {
-        const rascunho = lerRascunho();
-        if (rascunho) {
-            const hospedesGuardados = rascunho.map(normalizarHospede);
-            return hospedesGuardados.length > 0 ? hospedesGuardados : [criarHospede()];
-        }
-
         const token = obterTokenReserva();
         const response = await fetch(`/forms/get/${encodeURIComponent(token)}`);
 
@@ -100,17 +107,38 @@ document.addEventListener("DOMContentLoaded", () => {
     preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
     preencherSelect(inputPaisEmissao, window.SIBA_COUNTRIES, "Selecione um país");
 
-    async function submitForm() {
-        salvarAtual();
-        if (!validarHospedes()) {
-            throw new Error("Existem campos obrigatórios por preencher.");
-        }
-
+    function submitForm() {
         const token = obterTokenReserva();
+        const lista = JSON.stringify(hospedes);
+        const gravacao = gravacaoPendente.then(async () => {
+            if (lista !== ultimaListaGuardada) {
+                await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: JSON.parse(lista) });
+                ultimaListaGuardada = lista;
+            }
+            if (lista === JSON.stringify(hospedes)) {
+                try {
+                    if (localStorage.getItem(chaveRascunho) === lista) {
+                        localStorage.removeItem(chaveRascunho);
+                    }
+                } catch (error) {
+                    console.warn("Não foi possível limpar o rascunho de check-in.", error);
+                }
+            }
+            return token;
+        });
+        gravacaoPendente = gravacao.catch(() => {});
+        return gravacao;
+    }
 
-        await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: hospedes });
-        //localStorage.removeItem(obterStorageKey());
-        return token;
+    function guardarSeCompleto() {
+        clearTimeout(temporizadorGravacao);
+        if (!validarHospedes(false)) {
+            return;
+        }
+        submitForm().catch((error) => {
+            console.error("Erro ao guardar os hóspedes:", error);
+            alert("Não foi possível guardar os dados dos hóspedes.");
+        });
     }
 
     function preencherSelect(select, options, placeholder) {
@@ -123,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-/*     function salvarAtual() {
+    function salvarAtual() {
         if (hospedes[indiceAtual]) {
             hospedes[indiceAtual].full_name = inputNome.value;
             hospedes[indiceAtual].birth_date = inputNascimento.value;
@@ -133,11 +161,25 @@ document.addEventListener("DOMContentLoaded", () => {
             hospedes[indiceAtual].id_type = inputTipoDocumento.value;
             hospedes[indiceAtual].id_number = inputDoc.value;
             hospedes[indiceAtual].country_of_issue = inputPaisEmissao.value;
-            localStorage.setItem(obterStorageKey(), JSON.stringify(hospedes));
         }
-    } */
+    }
 
-    function validarHospedes() {
+    function registarEdicao() {
+        salvarAtual();
+        guardarRascunho();
+        clearTimeout(temporizadorGravacao);
+        temporizadorGravacao = setTimeout(guardarSeCompleto, 700);
+    }
+
+    for (const campo of [
+        inputNome, inputNascimento, inputNacionalidade, inputPaisResidencia,
+        inputCidadeResidencia, inputTipoDocumento, inputDoc, inputPaisEmissao
+    ]) {
+        campo.addEventListener("input", registarEdicao);
+        campo.addEventListener("change", registarEdicao);
+    }
+
+    function validarHospedes(mostrarErro = true) {
         const camposObrigatorios = [
             ["full_name", "nome completo"],
             ["birth_date", "data de nascimento"],
@@ -154,9 +196,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const campoEmFalta = camposObrigatorios.find(([campo]) => !String(hospede[campo] || "").trim());
 
             if (campoEmFalta) {
-                indiceAtual = index;
-                renderizar();
-                alert(`Preencha o campo "${campoEmFalta[1]}" do Hóspede ${index + 1}.`);
+                if (mostrarErro) {
+                    indiceAtual = index;
+                    renderizar();
+                    alert(`Preencha o campo "${campoEmFalta[1]}" do Hóspede ${index + 1}.`);
+                }
                 return false;
             }
         }
@@ -191,7 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     : "bg-slate-200 text-slate-700 hover:bg-slate-300"
             }`;
             tab.addEventListener("click", () => {
-                //salvarAtual();
+                salvarAtual();
+                guardarRascunho();
+                guardarSeCompleto();
                 indiceAtual = idx;
                 renderizar();
             });
@@ -199,41 +245,33 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
- /*    function removeGuest(guestList) {
-        localStorage.setItem(obterStorageKey(), JSON.stringify(guestList));
-    } */
-
-/*     inputNome.addEventListener("input", salvarAtual);
-    inputNascimento.addEventListener("input", salvarAtual);
-    inputNacionalidade.addEventListener("change", salvarAtual);
-    inputPaisResidencia.addEventListener("change", salvarAtual);
-    inputCidadeResidencia.addEventListener("input", salvarAtual);
-    inputTipoDocumento.addEventListener("change", salvarAtual);
-    inputDoc.addEventListener("input", salvarAtual);
-    inputPaisEmissao.addEventListener("change", salvarAtual); */
-
     btnRemove.addEventListener("click", () => {
         if (hospedes.length > 1) {
-            //salvarAtual();
+            salvarAtual();
             hospedes.splice(indiceAtual, 1);
             if (indiceAtual >= hospedes.length) {
                 indiceAtual = hospedes.length - 1;
             }
-            removeGuest(hospedes);
+            guardarRascunho();
+            guardarSeCompleto();
             renderizar();
         }
     });
 
     btnAdd.addEventListener("click", () => {
-        //salvarAtual();
+        salvarAtual();
+        guardarSeCompleto();
         hospedes.push(criarHospede());
+        guardarRascunho();
         indiceAtual = hospedes.length - 1;
         renderizar();
     });
 
     btnAnterior.addEventListener("click", () => {
         if (indiceAtual > 0) {
-            //salvarAtual();
+            salvarAtual();
+            guardarRascunho();
+            guardarSeCompleto();
             indiceAtual--;
             renderizar();
         }
@@ -241,7 +279,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnSeguinte.addEventListener("click", () => {
         if (indiceAtual < hospedes.length - 1) {
-            ////salvarAtual();
+            salvarAtual();
+            guardarRascunho();
+            guardarSeCompleto();
             indiceAtual++;
             renderizar();
         }
@@ -284,7 +324,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnSendSiba) {
         btnSendSiba.addEventListener("click", async () => {
             console.log("Botão 'Enviar para o SIBA' clicado");
+            clearTimeout(temporizadorGravacao);
             salvarAtual();
+            guardarRascunho();
             if (!validarHospedes()) {
                 return;
             }
@@ -335,16 +377,23 @@ document.addEventListener("DOMContentLoaded", () => {
         sibaStatusClose.addEventListener("click", fecharEstadoSiba);
     }
 
+    const rascunho = lerRascunho();
+    if (rascunho) {
+        hospedes = rascunho;
+    }
     renderizar();
 
-    carregarHospedes()
-        .then((hospedesCarregados) => {
-            hospedes = hospedesCarregados;
-            renderizar();
-        })
-        .catch((error) => {
-            console.error("Erro ao carregar os dados guardados:", error);
-            hospedes = [criarHospede()];
-            renderizar();
-        });
+    if (!rascunho) {
+        carregarHospedes()
+            .then((hospedesCarregados) => {
+                if (!houveEdicao) {
+                    hospedes = hospedesCarregados;
+                    ultimaListaGuardada = JSON.stringify(hospedes);
+                    renderizar();
+                }
+            })
+            .catch((error) => {
+                console.error("Erro ao carregar os dados guardados:", error);
+            });
+    }
 });
