@@ -110,11 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return gravacao;
     }
 
-    function guardarSeCompleto() {
+    function guardarAlteracoes() {
         clearTimeout(temporizadorGravacao);
-        if (!validarHospedes(false)) {
-            return;
-        }
         submitForm().catch((error) => {
             console.error("Erro ao guardar os hóspedes:", error);
             alert("Não foi possível guardar os dados dos hóspedes.");
@@ -149,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         salvarAtual();
         houveEdicao = true;
         clearTimeout(temporizadorGravacao);
-        temporizadorGravacao = setTimeout(guardarSeCompleto, 700);
+        temporizadorGravacao = setTimeout(guardarAlteracoes, 700);
     }
 
     for (const campo of [
@@ -218,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
             tab.addEventListener("click", () => {
                 salvarAtual();
                 houveEdicao = true;
-                guardarSeCompleto();
+                guardarAlteracoes();
                 indiceAtual = idx;
                 renderizar();
             });
@@ -234,14 +231,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 indiceAtual = hospedes.length - 1;
             }
             houveEdicao = true;
-            guardarSeCompleto();
+            guardarAlteracoes();
             renderizar();
         }
     });
 
     btnAdd.addEventListener("click", () => {
         salvarAtual();
-        guardarSeCompleto();
+        guardarAlteracoes();
         hospedes.push(criarHospede());
         houveEdicao = true;
         indiceAtual = hospedes.length - 1;
@@ -252,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (indiceAtual > 0) {
             salvarAtual();
             houveEdicao = true;
-            guardarSeCompleto();
+            guardarAlteracoes();
             indiceAtual--;
             renderizar();
         }
@@ -262,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (indiceAtual < hospedes.length - 1) {
             salvarAtual();
             houveEdicao = true;
-            guardarSeCompleto();
+            guardarAlteracoes();
             indiceAtual++;
             renderizar();
         }
@@ -381,10 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(temporizadorGravacao);
         saveStatus.textContent = "";
         salvarAtual();
-        guardarRascunho();
-        if (!validarHospedes()) {
-            return;
-        }
 
         btnSave.disabled = true;
         saveStatus.textContent = "A guardar…";

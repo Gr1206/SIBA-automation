@@ -23,6 +23,18 @@ from app.core.config import settings
 
 router = APIRouter(prefix="/forms", tags=["Forms"])
 
+GUEST_FIELDS = (
+    "full_name",
+    "birth_date",
+    "nationality",
+    "country_of_residence",
+    "city_of_residence",
+    "id_type",
+    "id_number",
+    "country_of_issue",
+)
+EMPTY_DRAFT_FULL_NAME = "\x00"
+
 
 @router.post(
     "/submit/{reservation_token}",
@@ -49,21 +61,16 @@ def store_forms(
         .order_by(Form.id)
         .all()
     )
-    guest_fields = (
-        "full_name",
-        "birth_date",
-        "nationality",
-        "country_of_residence",
-        "city_of_residence",
-        "id_type",
-        "id_number",
-        "country_of_issue",
-    )
     incoming_guests = [guest.model_dump() for guest in payload.guests]
-    existing_guests = [
-        {field: decrypt_data(getattr(form, field)) for field in guest_fields}
-        for form in existing_forms
-    ]
+    existing_guests = []
+    for form in existing_forms:
+        existing_guest = {}
+        for field in GUEST_FIELDS:
+            value = decrypt_data(getattr(form, field))
+            if field == "full_name" and value == EMPTY_DRAFT_FULL_NAME:
+                value = None
+            existing_guest[field] = value or None
+        existing_guests.append(existing_guest)
 
     if existing_guests == incoming_guests:
         return {
@@ -84,14 +91,11 @@ def store_forms(
     for existing_form in existing_forms:
         db.delete(existing_form)
     for guest_data in incoming_guests:
-        guest_data["full_name"] = encrypt_data(guest_data["full_name"])
-        guest_data["birth_date"] = encrypt_data(guest_data["birth_date"])
-        guest_data["nationality"] = encrypt_data(guest_data["nationality"])
-        guest_data["country_of_residence"] = encrypt_data(guest_data["country_of_residence"])
-        guest_data["city_of_residence"] = encrypt_data(guest_data["city_of_residence"])
-        guest_data["id_type"] = encrypt_data(guest_data["id_type"])
-        guest_data["id_number"] = encrypt_data(guest_data["id_number"])
-        guest_data["country_of_issue"] = encrypt_data(guest_data["country_of_issue"])
+        for field in GUEST_FIELDS:
+            value = guest_data[field]
+            if field == "full_name" and value is None:
+                value = EMPTY_DRAFT_FULL_NAME
+            guest_data[field] = encrypt_data(value)
 
         new_form = Form (
             reservation_id = reservation.id,
@@ -99,7 +103,11 @@ def store_forms(
         )
         db.add(new_form)
 
-    reservation.status = "Completed"
+    complete = all(
+        all(guest.get(field) for field in GUEST_FIELDS)
+        for guest in incoming_guests
+    )
+    reservation.status = "Completed" if complete else "Pending"
     reservation.guest_count = len(incoming_guests)
     if submission and submission.status == "Sent":
         submission.status = "Superseded"
@@ -136,15 +144,11 @@ def get_forms(
     decrypted_forms = []
     for form in forms:
         decrypted_form = {
-            "full_name": decrypt_data(form.full_name),
-            "birth_date": decrypt_data(form.birth_date),
-            "nationality": decrypt_data(form.nationality),
-            "country_of_residence": decrypt_data(form.country_of_residence),
-            "city_of_residence": decrypt_data(form.city_of_residence),
-            "id_type": decrypt_data(form.id_type),
-            "id_number": decrypt_data(form.id_number),
-            "country_of_issue": decrypt_data(form.country_of_issue)
+            field: decrypt_data(getattr(form, field))
+            for field in GUEST_FIELDS
         }
+        if decrypted_form["full_name"] == EMPTY_DRAFT_FULL_NAME:
+            decrypted_form["full_name"] = None
         decrypted_forms.append(decrypted_form)
 
     return {"guests": decrypted_forms}
@@ -220,6 +224,19 @@ def get_forms_xml(
             status_code=status.HTTP_409_CONFLICT,
             detail="Já existe uma tentativa de envio sem resultado confirmado. Confirme o estado no SIBA antes de repetir.",
         )
+
+    for form in forms:
+        for field in GUEST_FIELDS:
+            value = decrypt_data(getattr(form, field))
+            if (
+                not value
+                or not value.strip()
+                or (field == "full_name" and value == EMPTY_DRAFT_FULL_NAME)
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Preencha todos os dados dos hóspedes antes de enviar para o SIBA.",
+                )
 
     file_number = get_next_file_number(db, user_id)
     try:
