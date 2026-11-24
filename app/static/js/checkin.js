@@ -67,6 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const tabsContainer = document.getElementById("tabs-container");
+    const btnSave = document.getElementById("btn-refresh");
+    const saveStatus = document.getElementById("checkin-save-status");
     const btnSendSiba = document.getElementById("btn-sendSiba");
     const inputNome = document.getElementById("campo-nome");
     const inputNascimento = document.getElementById("campo-nascimento");
@@ -143,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function registarEdicao() {
+        saveStatus.textContent = "";
         salvarAtual();
         houveEdicao = true;
         clearTimeout(temporizadorGravacao);
@@ -373,6 +376,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+
+    btnSave.addEventListener("click", async () => {
+        clearTimeout(temporizadorGravacao);
+        saveStatus.textContent = "";
+        salvarAtual();
+        guardarRascunho();
+        if (!validarHospedes()) {
+            return;
+        }
+
+        btnSave.disabled = true;
+        saveStatus.textContent = "A guardar…";
+        try {
+            await submitForm();
+            if (saveStatus.textContent) {
+                saveStatus.textContent = "Dados guardados.";
+            }
+        } catch {
+            saveStatus.textContent = "Não foi possível guardar os dados.";
+        } finally {
+            btnSave.disabled = false;
+        }
+    });
 
     if (btnSendSiba) {
         btnSendSiba.addEventListener("click", async () => {

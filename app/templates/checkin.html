@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ url_for('static', path='js/countries.js') }}?v=1"></script>
     <script src="{{ url_for('static', path='js/nationalities.js') }}?v=1"></script>
-    <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=17"></script>
+    <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=18"></script>
 </head>
 <body class="bg-slate-100 min-h-screen p-3 sm:p-4 flex items-start sm:items-center justify-center font-sans" data-siba-environment="{{ siba_env }}">
 
@@ -27,6 +27,7 @@
             </div>
         </div>
         <div id="tabs-container" class="flex gap-2 mb-3 overflow-x-auto pb-1"></div>
+
         <form id="form-checkin" class="space-y-3">
             <div class="grid gap-3 sm:grid-cols-2">
                 <div class="sm:col-span-2">
@@ -81,10 +82,14 @@
 
 
             <div class="flex flex-col gap-3 sm:flex-row">
+                <button id="btn-refresh" type="button" class="w-full min-h-11 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-60">
+                    Guardar
+                </button>
                 <button id="btn-sendSiba" type="button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
                     Enviar para o SIBA
                 </button>
             </div>
+            <p id="checkin-save-status" role="status" class="empty:hidden text-sm text-slate-700"></p>
             <div id="siba-status-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 px-4" role="dialog" aria-modal="true" aria-labelledby="siba-status-title">
                 <div class="w-full max-w-md rounded-xl bg-white p-4 sm:p-6 shadow-xl">
                     <h2 id="siba-status-title" class="text-lg font-bold text-slate-800">Envio para o SIBA</h2>
