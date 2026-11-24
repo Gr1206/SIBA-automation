@@ -6,12 +6,19 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routes import checkin, dashboard, reservations, profile, login, notifications, forms
 from app.core.templates import templates
-from app.db.session import engine, Base, ensure_user_profile_columns, SessionLocal
+from app.db.session import (
+    engine,
+    Base,
+    ensure_user_profile_columns,
+    ensure_submission_tracking_columns,
+    SessionLocal,
+)
 from app.exceptions.expiredSession import SessionExpiredException
 from app.models.reservations import Reservation
 
 Base.metadata.create_all(bind=engine) 
 ensure_user_profile_columns()
+ensure_submission_tracking_columns()
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
 BASE_DIR = Path(__file__).resolve().parent #base do proj
 
@@ -27,6 +34,17 @@ app.include_router(login.router)
 app.include_router(notifications.router)
 app.include_router(forms.router)
 #app.include_router(submissionsSiba.router)
+
+
+@app.exception_handler(SessionExpiredException)
+async def session_expired_handler(request: Request, exc: SessionExpiredException):
+    return templates.TemplateResponse(
+        request=request,
+        name="session_expired.html",
+        context={"titulo": "Sessão Expirada"},
+        status_code=401,
+    )
+
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):

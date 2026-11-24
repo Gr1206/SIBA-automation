@@ -126,7 +126,11 @@ def getPropertyData(db: Session, user_id: int) -> dict | None:
     }
 
 
-def getReservationData(db: Session, reservation_id: int) -> dict | None:
+def getReservationData(
+    db: Session,
+    reservation_id: int,
+    file_number: int | None = None,
+) -> dict | None:
     """
     Se file_number for None, pede o próximo sequencial com get_next_file_number.
     Para testes, passa um file_number fixo (ex.: 1) para não consumir o sequencial real.
@@ -135,7 +139,8 @@ def getReservationData(db: Session, reservation_id: int) -> dict | None:
     if not reservation:
         return None
 
-    file_number = get_next_file_number(db, reservation.user_id)
+    if file_number is None:
+        file_number = get_next_file_number(db, reservation.user_id)
 
     return {
         "file_number": file_number,
@@ -280,19 +285,11 @@ def validate_against_xsd(xml_string: str, xsd_path: str | Path) -> list[str]:
     return [f"linha {e.line}: {e.message}" for e in schema.error_log]
 
 
-def save_xml(xml_string: str, directory: str | Path | None = None, filename: str | None = None) -> Path:
-    """Guarda o XML no diretório indicado (por omissão, o diretório atual)."""
-    directory = Path(directory) if directory else Path.cwd()
-    directory.mkdir(parents=True, exist_ok=True)
-    if not filename:
-        filename = f"siba_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xml"
-    path = directory / filename
-    path.write_text(xml_string, encoding="utf-8")
-    return path
-
-
-
-def generate_siba_xml_for_reservation(db: Session, reservation_id: int) -> str:
+def generate_siba_xml_for_reservation(
+    db: Session,
+    reservation_id: int,
+    file_number: int | None = None,
+) -> str:
     """
     Gera o XML SIBA para uma reserva específica.
     Se file_number for None, pede o próximo sequencial com get_next_file_number.
@@ -302,7 +299,11 @@ def generate_siba_xml_for_reservation(db: Session, reservation_id: int) -> str:
     if not reservation:
         raise SibaValidationError("Reserva não encontrada.")
 
-    res_data = getReservationData(db, reservation_id=reservation_id)
+    res_data = getReservationData(
+        db,
+        reservation_id=reservation_id,
+        file_number=file_number,
+    )
     forms_data = getFormsData(db, reservation_id=reservation_id)
 
     if not res_data:
@@ -315,7 +316,6 @@ def generate_siba_xml_for_reservation(db: Session, reservation_id: int) -> str:
         raise SibaValidationError("Propriedade não encontrada.")
 
     xml_final = generate_sibaXml(prop_data, res_data, forms_data)
-    print(f"\nXML guardado em: {save_xml(xml_final, filename='teste_siba2.xml')}")
     return xml_final
 # ---------------------------------------------------------------------------
 # Teste local
@@ -344,14 +344,10 @@ if __name__ == "__main__":
         except SibaValidationError as exc:
             raise SystemExit(f"Dados inválidos para o SIBA: {exc}")
 
-        print(xml_final)
-
         if XSD_PATH.exists():
             errors = validate_against_xsd(xml_final, XSD_PATH)
             print("XML válido contra o XSD." if not errors else "Erros XSD:\n" + "\n".join(errors))
         else:
             print(f"(XSD '{XSD_PATH}' não encontrado, validação ignorada.)")
-
-        print(f"\nXML guardado em: {save_xml(xml_final, filename='teste_siba.xml')}")
     finally:
         db.close()

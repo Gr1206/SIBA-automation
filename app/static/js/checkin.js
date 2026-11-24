@@ -25,27 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return pathSegments[pathSegments.length - 1];
     }
 
-    const chaveRascunho = `siba_hospedes_draft_${obterTokenReserva()}`;
-
-    function lerRascunho() {
-        try {
-            const lista = JSON.parse(localStorage.getItem(chaveRascunho));
-            if (Array.isArray(lista) && lista.length > 0) {
-                return lista.map(normalizarHospede);
-            }
-        } catch (error) {
-            console.warn("Não foi possível carregar o rascunho de check-in.", error);
-        }
-        return null;
-    }
-
-    function guardarRascunho() {
-        houveEdicao = true;
-        try {
-            localStorage.setItem(chaveRascunho, JSON.stringify(hospedes));
-        } catch (error) {
-            console.warn("Não foi possível guardar o rascunho de check-in.", error);
-        }
+    const chaveRascunhoAntigo = `siba_hospedes_draft_${obterTokenReserva()}`;
+    try {
+        localStorage.removeItem(chaveRascunhoAntigo);
+    } catch (error) {
+        console.warn("Não foi possível remover um rascunho local antigo.", error);
     }
 
     async function carregarHospedes() {
@@ -102,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const sibaStatusMessage = document.getElementById("siba-status-message");
     const sibaStatusDetails = document.getElementById("siba-status-details");
     const sibaStatusClose = document.getElementById("siba-status-close");
+    const sibaReconcileActions = document.getElementById("siba-reconcile-actions");
+    const sibaReconcileAccepted = document.getElementById("siba-reconcile-accepted");
+    const sibaReconcileNotReceived = document.getElementById("siba-reconcile-not-received");
 
     preencherSelect(inputNacionalidade, window.SIBA_NATIONALITIES, "Selecione uma nacionalidade");
     preencherSelect(inputPaisResidencia, window.SIBA_COUNTRIES, "Selecione um país");
@@ -114,15 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (lista !== ultimaListaGuardada) {
                 await postJSON("/forms/submit/" + encodeURIComponent(token), { guests: JSON.parse(lista) });
                 ultimaListaGuardada = lista;
-            }
-            if (lista === JSON.stringify(hospedes)) {
-                try {
-                    if (localStorage.getItem(chaveRascunho) === lista) {
-                        localStorage.removeItem(chaveRascunho);
-                    }
-                } catch (error) {
-                    console.warn("Não foi possível limpar o rascunho de check-in.", error);
-                }
             }
             return token;
         });
@@ -166,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function registarEdicao() {
         salvarAtual();
-        guardarRascunho();
+        houveEdicao = true;
         clearTimeout(temporizadorGravacao);
         temporizadorGravacao = setTimeout(guardarSeCompleto, 700);
     }
@@ -236,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }`;
             tab.addEventListener("click", () => {
                 salvarAtual();
-                guardarRascunho();
+                houveEdicao = true;
                 guardarSeCompleto();
                 indiceAtual = idx;
                 renderizar();
@@ -252,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (indiceAtual >= hospedes.length) {
                 indiceAtual = hospedes.length - 1;
             }
-            guardarRascunho();
+            houveEdicao = true;
             guardarSeCompleto();
             renderizar();
         }
@@ -262,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         salvarAtual();
         guardarSeCompleto();
         hospedes.push(criarHospede());
-        guardarRascunho();
+        houveEdicao = true;
         indiceAtual = hospedes.length - 1;
         renderizar();
     });
@@ -270,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAnterior.addEventListener("click", () => {
         if (indiceAtual > 0) {
             salvarAtual();
-            guardarRascunho();
+            houveEdicao = true;
             guardarSeCompleto();
             indiceAtual--;
             renderizar();
@@ -280,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnSeguinte.addEventListener("click", () => {
         if (indiceAtual < hospedes.length - 1) {
             salvarAtual();
-            guardarRascunho();
+            houveEdicao = true;
             guardarSeCompleto();
             indiceAtual++;
             renderizar();
@@ -294,11 +272,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function atualizarEstadoSiba({ title, message, details = "", concluido = false, sucesso = false }) {
+    function atualizarEstadoSiba({
+        title,
+        message,
+        details = "",
+        concluido = false,
+        sucesso = false,
+        reconciliar = false,
+    }) {
         sibaStatusTitle.textContent = title;
         sibaStatusMessage.textContent = message;
         sibaStatusDetails.textContent = details;
         sibaStatusDetails.classList.toggle("hidden", !details);
+        sibaReconcileActions.classList.toggle("hidden", !reconciliar);
         sibaStatusTitle.className = `text-lg font-bold ${
             sucesso ? "text-emerald-700" : concluido ? "text-red-700" : "text-slate-800"
         }`;
@@ -319,14 +305,86 @@ document.addEventListener("DOMContentLoaded", () => {
         sibaStatusModal.classList.remove("flex");
     }
 
+    function mostrarResultadoEnvio(resultado) {
+        if (!resultado.success) {
+            atualizarEstadoSiba({
+                title: "Envio concluído com erro",
+                message: "O SIBA rejeitou os dados enviados.",
+                details: [
+                    resultado.code ? `Código(s): ${resultado.code}` : "",
+                    resultado.description || ""
+                ].filter(Boolean).join("\n"),
+                concluido: true
+            });
+            return;
+        }
+
+        atualizarEstadoSiba({
+            title: "Envio concluído",
+            message: "Os dados foram enviados com sucesso para o SIBA.",
+            concluido: true,
+            sucesso: true
+        });
+    }
+
+    async function reconciliarEnvio(decision) {
+        if (
+            decision === "not_received" &&
+            document.body.dataset.sibaEnvironment === "prod" &&
+            !window.confirm("Vai autorizar um novo envio para o SIBA de PRODUÇÃO. Confirmar?")
+        ) {
+            return;
+        }
+
+        sibaReconcileAccepted.disabled = true;
+        sibaReconcileNotReceived.disabled = true;
+        const token = obterTokenReserva();
+        try {
+            await postJSON(`/forms/resolve/${encodeURIComponent(token)}`, { decision });
+            if (decision === "accepted") {
+                atualizarEstadoSiba({
+                    title: "Envio confirmado",
+                    message: "Assinalado como recebido no SIBA. Não foi feito um novo envio.",
+                    concluido: true,
+                    sucesso: true
+                });
+                return;
+            }
+
+            atualizarEstadoSiba({
+                title: "A aguardar o SIBA",
+                message: "A tentar novamente com um novo número de ficheiro."
+            });
+            const response = await postJSON(`/forms/get-xml/${encodeURIComponent(token)}`);
+            mostrarResultadoEnvio(await response.json());
+        } catch (error) {
+            console.error("Erro ao reconciliar o envio para o SIBA:", error);
+            const resultadoIncerto = error.message && error.message.includes("(502)");
+            atualizarEstadoSiba({
+                title: "Não foi possível reconciliar o envio",
+                message: "Confirme o estado no portal do SIBA antes de voltar a tentar.",
+                details: error.message || "Ocorreu um erro inesperado.",
+                concluido: true,
+                reconciliar: resultadoIncerto
+            });
+        } finally {
+            sibaReconcileAccepted.disabled = false;
+            sibaReconcileNotReceived.disabled = false;
+        }
+    }
 
 
     if (btnSendSiba) {
         btnSendSiba.addEventListener("click", async () => {
-            console.log("Botão 'Enviar para o SIBA' clicado");
+            if (
+                document.body.dataset.sibaEnvironment === "prod" &&
+                !window.confirm("Vai enviar estes dados para o SIBA de PRODUÇÃO. Confirmar?")
+            ) {
+                return;
+            }
             clearTimeout(temporizadorGravacao);
             salvarAtual();
-            guardarRascunho();
+            houveEdicao = true;
             if (!validarHospedes()) {
                 return;
             }
@@ -337,34 +395,16 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const token = await submitForm();
                 const response = await postJSON("/forms/get-xml/" + encodeURIComponent(token));
-                const resultado = await response.json();
-
-                if (!resultado.success) {
-                    atualizarEstadoSiba({
-                        title: "Envio concluído com erro",
-                        message: "O SIBA rejeitou os dados enviados.",
-                        details: [
-                            resultado.code ? `Código(s): ${resultado.code}` : "",
-                            resultado.description || ""
-                        ].filter(Boolean).join("\n"),
-                        concluido: true
-                    });
-                    return;
-                }
-
-                atualizarEstadoSiba({
-                    title: "Envio concluído",
-                    message: "Os dados foram enviados com sucesso para o SIBA.",
-                    concluido: true,
-                    sucesso: true
-                });
+                mostrarResultadoEnvio(await response.json());
             } catch (error) {
                 console.error("Erro ao enviar os dados para o SIBA:", error);
+                const resultadoIncerto = error.message && error.message.includes("(502)");
                 atualizarEstadoSiba({
                     title: "Envio concluído com erro",
                     message: "Não foi possível concluir o envio para o SIBA.",
                     details: error.message || "Ocorreu um erro inesperado.",
-                    concluido: true
+                    concluido: true,
+                    reconciliar: resultadoIncerto
                 });
             } finally {
                 btnSendSiba.disabled = false;
@@ -377,23 +417,20 @@ document.addEventListener("DOMContentLoaded", () => {
         sibaStatusClose.addEventListener("click", fecharEstadoSiba);
     }
 
-    const rascunho = lerRascunho();
-    if (rascunho) {
-        hospedes = rascunho;
-    }
+    sibaReconcileAccepted.addEventListener("click", () => reconciliarEnvio("accepted"));
+    sibaReconcileNotReceived.addEventListener("click", () => reconciliarEnvio("not_received"));
+
     renderizar();
 
-    if (!rascunho) {
-        carregarHospedes()
-            .then((hospedesCarregados) => {
-                if (!houveEdicao) {
-                    hospedes = hospedesCarregados;
-                    ultimaListaGuardada = JSON.stringify(hospedes);
-                    renderizar();
-                }
-            })
-            .catch((error) => {
-                console.error("Erro ao carregar os dados guardados:", error);
-            });
-    }
+    carregarHospedes()
+        .then((hospedesCarregados) => {
+            if (!houveEdicao) {
+                hospedes = hospedesCarregados;
+                ultimaListaGuardada = JSON.stringify(hospedes);
+                renderizar();
+            }
+        })
+        .catch((error) => {
+            console.error("Erro ao carregar os dados guardados:", error);
+        });
 });

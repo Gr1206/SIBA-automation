@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -7,7 +9,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Credenciais e endpoints do SIBA
-    SIBA_ENV: str = "dev"  # "dev" ou "prod"
+    SIBA_ENV: Literal["dev", "prod"] = "dev"
     SIBA_WSDL_DEV: str = "https://siba.ssi.gov.pt/bawsdev/boletinsalojamento.asmx"
     SIBA_WSDL_PROD: str = "https://siba.ssi.gov.pt/baws/boletinsalojamento.asmx"
 

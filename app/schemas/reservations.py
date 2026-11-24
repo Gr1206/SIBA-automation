@@ -1,18 +1,15 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 #frontend no POST
 class ReservationCreate(BaseModel):
-    #code: int
-    #id: int
-    guest_name: str = Field(default="Pendente", alias="guestName")
     guest_count: int = Field(default=1, alias="guestCount")
     check_in: Optional[date] = Field(default=None, alias="checkIn")
     check_out: Optional[date] = Field(default=None, alias="checkOut")
     status: str = "Pending"
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
 #frontend no GET
 class ReservationResponse(BaseModel):
@@ -27,9 +24,15 @@ class ReservationResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("guest_name", mode="before")
+    @classmethod
+    def redact_guest_name(cls, value):
+        if value and str(value).lower().startswith(("pending", "pendente")):
+            return "Pendente"
+        return "Hóspede"
+
 
 class ReservationUpdate(BaseModel):
-    guest_name: Optional[str] = Field(default=None, alias="guestName")
     guest_count: Optional[int] = Field(default=None, alias="guestCount")
     check_in: Optional[date] = Field(default=None, alias="checkIn")
     check_out: Optional[date] = Field(default=None, alias="checkOut")
@@ -39,4 +42,4 @@ class ReservationUpdate(BaseModel):
     # Isso é útil para atualizações parciais, onde você pode querer atualizar apenas alguns campos de um registro existente sem precisar fornecer todos os 
     # campos obrigatórios.
 
-    model_config = ConfigDict(populate_by_name=True)   
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")

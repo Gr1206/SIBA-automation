@@ -9,7 +9,7 @@
     <script src="{{ url_for('static', path='js/nationalities.js') }}?v=1"></script>
     <script type="module" src="{{ url_for('static', path='js/checkin.js') }}?v=17"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-3 sm:p-4 flex items-start sm:items-center justify-center font-sans">
+<body class="bg-slate-100 min-h-screen p-3 sm:p-4 flex items-start sm:items-center justify-center font-sans" data-siba-environment="{{ siba_env }}">
 
         <button id="btn-back" type="button" class="absolute top-4 left-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1 px-3 rounded-lg border border-slate-300 text-sm">
             &larr; Voltar
@@ -90,6 +90,15 @@
                     <h2 id="siba-status-title" class="text-lg font-bold text-slate-800">Envio para o SIBA</h2>
                     <p id="siba-status-message" class="mt-2 text-sm text-slate-600">Aguarde enquanto o envio é processado.</p>
                     <p id="siba-status-details" class="mt-2 hidden whitespace-pre-line text-sm text-red-700"></p>
+                    <div id="siba-reconcile-actions" class="hidden mt-5 space-y-2">
+                        <p class="text-sm text-amber-800">Confirme primeiro o resultado no portal do SIBA:</p>
+                        <button id="siba-reconcile-accepted" type="button" class="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                            O SIBA recebeu — não reenviar
+                        </button>
+                        <button id="siba-reconcile-not-received" type="button" class="w-full rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
+                            O SIBA não recebeu — autorizar novo envio
+                        </button>
+                    </div>
                     <div class="mt-5 flex justify-end">
                         <button id="siba-status-close" type="button" class="hidden rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
                             Fechar

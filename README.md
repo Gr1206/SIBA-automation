@@ -25,7 +25,7 @@ Como o processo exige a assinatura do hóspede, o fluxo foi revisto. A assinatur
 3. Revê a informação e escolhe **Enviar para o SIBA**. A aplicação guarda os dados, gera o boletim em XML e submete-o por SOAP.
 4. O anfitrião acompanha o resultado no painel e pode corrigir os dados se o SIBA devolver um erro.
 
-A versão atual destina-se a demonstração local. Antes de voltar a disponibilizá-la online, falta exigir sessão e validar a titularidade da reserva também nos pedidos da API que leem e guardam os formulários, remover dados pessoais e credenciais dos registos da aplicação e validar o envio de ponta a ponta no ambiente do SIBA.
+A versão atual destina-se a demonstração local. Os pedidos de leitura e gravação dos formulários exigem agora sessão e validam a titularidade da reserva. Os dados dos hóspedes não são guardados em rascunhos do navegador nem incluídos nos registos da aplicação; o XML do envio também não é escrito em disco. As tentativas de envio são associadas à reserva e um resultado incerto bloqueia o reenvio automático até à confirmação manual do estado no portal do SIBA. Antes de disponibilizar a aplicação online, continua a ser necessário validar o fluxo de ponta a ponta no ambiente de testes do SIBA e rever/eliminar dados em texto simples de execuções anteriores.
 
 A configuração histórica pode ser consultada com `git show prototype-deployed:render.yaml`.
 

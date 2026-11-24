@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from requests import Session
+from app.core.config import settings
 from app.core.templates import templates
 from app.db.session import get_db
 from app.models.reservations import Reservation
@@ -28,6 +29,7 @@ async def edit_checkin(request: Request, token: str,
             "reserva_id": reservation.id,
             "host_allowed": reservation,
             "edit_mode": True,
+            "siba_env": settings.SIBA_ENV,
         }
     )
 

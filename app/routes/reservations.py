@@ -77,8 +77,7 @@ def create_reservation(
     db: Session = Depends(get_db)):
 
     new = Reservation(
-        #code=payload.code,
-        guest_name=payload.guest_name,
+        guest_name="Pendente",
         guest_count=payload.guest_count,
         check_in=payload.check_in,
         check_out=payload.check_out,

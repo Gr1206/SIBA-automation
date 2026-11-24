@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Cookie, HTTPException, Request, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from app.core.templates import templates
 from app.utils.sec import current_user, encrypt_sibaKey
-from app.services.xml_builder import getPropertyData
-
 from app.db.session import get_db
 from app.models.login import User
 from app.schemas.profile import ProfileResponse, ProfileUpdate
@@ -45,7 +43,6 @@ def update_profile(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
 
     data = payload.model_dump(exclude_unset=True)
-    print(f"Profile update payload: {data}")
 
     if not payload.check_in_time or not payload.check_out_time:
         raise HTTPException(
@@ -61,9 +58,6 @@ def update_profile(
 
     db.commit()
     db.refresh(profile)
-    print(f"Saved property times: {profile.check_in_time}, {profile.check_out_time}")
-
-    print(getPropertyData(db, profile.id))  
     
     return profile
 

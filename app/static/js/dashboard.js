@@ -323,7 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
             totalReserv.textContent = reservations.length;
         }
 
-        const pendingCount = reservations.filter(r => r.status === "Pending" || r.status === "Completed").length;
+        const pendingCount = reservations.filter(r =>
+            ["Pending", "Completed", "Sending"].includes(r.status)
+        ).length;
         if (totalPend) {
             totalPend.textContent = pendingCount;
         }
@@ -347,12 +349,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const status = String(reservation.status || "").trim();
             const normalizedStatus = status.toLowerCase();
             const isCompleted = (normalizedStatus === "completed" ) || ( normalizedStatus === "pending" );
+            const isSending = normalizedStatus === "sending";
             const isError = normalizedStatus === "error";
             const isEditable = isCompleted || normalizedStatus === "sent" || isError;
             const badgeStyles = {
                 sent :"background-color: #dcfce7; color: #15803d; border-color: #bbf7d0;" ,
                 pending :"background-color: #fef3c7; color: #92400e; border-color: #fde68a;" ,
                 completed :"background-color: #d1fae5; color: #047857; border-color: #bbf7d0;" ,
+                sending :"background-color: #dbeafe; color: #1d4ed8; border-color: #bfdbfe;" ,
                 error :"background-color: #fee2e2; color: #b91c1c; border-color: #fecaca;" 
             }
            const statusBadgeStyle = badgeStyles[normalizedStatus] 
@@ -402,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         class="${isEditable
                             ? "text-emerald-600 hover:text-emerald-800"
                             : "text-slate-600 hover:text-blue-600"} font-medium"
-                    >${isEditable ? "Link Forms" : "Enviado"}</a>
+                    >${isSending ? "A enviar" : isEditable ? "Link Forms" : "Enviado"}</a>
                     <button
                         type="button"
                         data-id="${reservation.id}"
@@ -553,7 +557,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         check_in: checkInDate || null,
                         check_out: checkOutDate || null
                     } : {
-                        guest_name: "Pending " + (reservations.length + 1),
                         guest_count: 1,
                         check_in: checkInDate || null,
                         check_out: checkOutDate || null,

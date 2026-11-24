@@ -36,8 +36,9 @@ def current_user(user_id: str | None = Cookie(default=None)) -> int:
     """
     Verify and load the signed token to retrieve the original data.
     """
-    """ if not user_id:
-        raise SessionExpiredException() """
+    if not user_id:
+        raise SessionExpiredException()
+
     try:
         real_user_id = signer.loads(user_id)
         return int(real_user_id)

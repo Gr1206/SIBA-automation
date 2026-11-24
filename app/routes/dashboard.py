@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
+from app.core.config import settings
 from app.core.templates import templates
 from app.utils.sec import current_user
 
@@ -12,5 +13,5 @@ async def dashboard(request: Request,
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={"titulo": "DASHBOARD"}
+        context={"titulo": "DASHBOARD", "siba_env": settings.SIBA_ENV}
     )

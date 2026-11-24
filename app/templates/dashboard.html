@@ -17,9 +17,9 @@
             <span class="text-sm font-semibold text-slate-700">Controlo de Boletins de Alojamento</span>
         </div>
         <div class="flex items-center gap-3 text-xs">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Ambiente: DEV
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border font-medium {{ 'bg-rose-50 text-rose-700 border-rose-200' if siba_env == 'prod' else 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
+                <span class="w-1.5 h-1.5 rounded-full animate-pulse {{ 'bg-rose-500' if siba_env == 'prod' else 'bg-emerald-500' }}"></span>
+                Ambiente: {{ siba_env|upper }}
             </span>
         </div>
         <div class="flex items-center gap-3">
